@@ -1,28 +1,31 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+
+import 'package:accordion/accordion.dart';
+import 'package:care_connect_app/services/api_service.dart';
+import 'package:flutter/foundation.dart' show kIsWeb, Uint8List;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../services/notetaker_config_service.dart';
-import 'package:provider/provider.dart';
-import '../providers/user_provider.dart';
-import 'package:flutter/foundation.dart' show kIsWeb, Uint8List;
-import 'package:record/record.dart';
-import 'package:care_connect_app/services/api_service.dart';
 import 'package:http/http.dart' as http;
-import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
-import 'package:accordion/accordion.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
+import 'package:record/record.dart';
+
+import '../providers/user_provider.dart';
+import '../services/notetaker_config_service.dart';
 
 class NotetakerConfigurationPage extends StatefulWidget {
   const NotetakerConfigurationPage({super.key});
 
   @override
-  State<NotetakerConfigurationPage> createState() => _NotetakerConfigurationPageState();
+  State<NotetakerConfigurationPage> createState() =>
+      _NotetakerConfigurationPageState();
 }
 
-class _NotetakerConfigurationPageState extends State<NotetakerConfigurationPage> {
-
+class _NotetakerConfigurationPageState
+    extends State<NotetakerConfigurationPage> {
   PatientNotetakerConfigDTO? _currentConfig;
   bool _isLoading = true;
   bool _isSaving = false;
@@ -32,15 +35,14 @@ class _NotetakerConfigurationPageState extends State<NotetakerConfigurationPage>
   bool _isPatient = false;
   bool _isEnabled = true;
   bool _permitCaregiverAccess = false;
-  List<String>_PIIList = [];
+  List<String> _PIIList = [];
   List<String> _directories = [];
   late List<Widget> _PIIWidgetList = stringToCard(_PIIList);
   late List<Widget> _DirectoryWidgetList = stringToAccordion(_directories);
   Map<String, String> keyword_Event = {};
 
-
   //Audio Recorder
-  int _sampleRate = 16000;
+  final int _sampleRate = 16000;
   late final AudioRecorder _audioRecorder;
   StreamSubscription<RecordState>? _recordSub;
   RecordState _recordState = RecordState.stop;
@@ -76,9 +78,11 @@ class _NotetakerConfigurationPageState extends State<NotetakerConfigurationPage>
   Widget _buildConfigForm() {
     final theme = Theme.of(context);
     List<Widget> childWidgets = [];
-    final successText = 'Configure your Notetaker assistant to recognize PII, trigger words, etc and upload voice samples for speaker recognition.';
-    final failureText = 'Configuration options cannot be displayed because either you have no patients or their was an error fetching them.';
-    if(_isPatient) {
+    final successText =
+        'Configure your Notetaker assistant to recognize PII, trigger words, etc and upload voice samples for speaker recognition.';
+    final failureText =
+        'Configuration options cannot be displayed because either you have no patients or their was an error fetching them.';
+    if (_isPatient) {
       childWidgets = [
         _buildInfoCard(theme, successText),
         const SizedBox(height: 24),
@@ -88,13 +92,11 @@ class _NotetakerConfigurationPageState extends State<NotetakerConfigurationPage>
         const SizedBox(height: 24),
         _buildKeywordSection(theme),
         const SizedBox(height: 24),
-        _buildVoiceSampleSection(theme)
+        _buildVoiceSampleSection(theme),
       ];
-    } else if(_patientList.isEmpty) {
-      childWidgets = [
-        _buildInfoCard(theme, failureText),
-      ];
-    } else if(_selectedPatientId == null) {
+    } else if (_patientList.isEmpty) {
+      childWidgets = [_buildInfoCard(theme, failureText)];
+    } else if (_selectedPatientId == null) {
       childWidgets = [
         _buildInfoCard(theme, successText),
         const SizedBox(height: 24),
@@ -110,17 +112,17 @@ class _NotetakerConfigurationPageState extends State<NotetakerConfigurationPage>
         const SizedBox(height: 24),
         _buildKeywordSection(theme),
         const SizedBox(height: 24),
-        _buildVoiceSampleSection(theme)
+        _buildVoiceSampleSection(theme),
       ];
     }
 
-      return SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: childWidgets
-        ),
-      );
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: childWidgets,
+      ),
+    );
   }
 
   @override
@@ -134,40 +136,48 @@ class _NotetakerConfigurationPageState extends State<NotetakerConfigurationPage>
     return Scaffold(
       appBar: AppBar(
         title: Row(
-            children: [
-              const Text('Notetaker Configuration', style: TextStyle(fontSize: 18),),
-            ]),
+          children: [
+            const Text(
+              'Notetaker Configuration',
+              style: TextStyle(fontSize: 18),
+            ),
+          ],
+        ),
         actions: [
           TextButton(
             style: ButtonStyle(
-              padding: MaterialStateProperty.all(EdgeInsets.symmetric(horizontal: 5, vertical: 15)),
+              padding: WidgetStateProperty.all(
+                EdgeInsets.symmetric(horizontal: 5, vertical: 15),
+              ),
             ),
             onPressed: (_isLoading || _isSaving)
                 ? null
                 : () {
-              // Discard changes and navigate back
-              context.pop();
-            },
+                    // Discard changes and navigate back
+                    context.pop();
+                  },
             child: const Text('Cancel'),
           ),
           TextButton(
             style: ButtonStyle(
-              padding: MaterialStateProperty.all(EdgeInsets.symmetric(horizontal: 5, vertical: 15)),
+              padding: WidgetStateProperty.all(
+                EdgeInsets.symmetric(horizontal: 5, vertical: 15),
+              ),
             ),
             onPressed: (_isLoading || _isSaving)
                 ? null
                 : () async {
-              await _saveConfiguration();
-            },
+                    await _saveConfiguration();
+                  },
             child: _isSaving
                 ? const SizedBox(
-              width: 18,
-              height: 18,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: Colors.white,
-              ),
-            )
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
                 : const Text('Save'),
           ),
         ],
@@ -178,15 +188,18 @@ class _NotetakerConfigurationPageState extends State<NotetakerConfigurationPage>
     );
   }
 
-  List<Widget> stringToAccordion(List<String> directories)  {
+  List<Widget> stringToAccordion(List<String> directories) {
     List<Widget> namedVoices = [];
-    for(int i=0; i<directories.length; i++) {
+    for (int i = 0; i < directories.length; i++) {
       List<String> files = [];
       Directory voiceDirectory = Directory(directories[i]);
       String name = path.basename(directories[i]);
       if (voiceDirectory.existsSync()) {
         // Use the list method to get all files and directories
-        for (var entity in voiceDirectory.listSync(recursive: false, followLinks: false)) {
+        for (var entity in voiceDirectory.listSync(
+          recursive: false,
+          followLinks: false,
+        )) {
           if (entity is File) {
             files.add(entity.path); // Add file paths to the list
           }
@@ -197,103 +210,120 @@ class _NotetakerConfigurationPageState extends State<NotetakerConfigurationPage>
       } else {
         print('Directory does not exist.');
       }
-      if(files.isEmpty) {
+      if (files.isEmpty) {
         voiceDirectory.deleteSync(recursive: true);
       } else {
         namedVoices.add(
-            Card(
-                child: Padding(
-                    padding: EdgeInsets.all(10.0),
-                    child: Accordion(
-                      headerBorderRadius: 50,
-                      headerPadding: EdgeInsets.all(15.0),
-                      children: [AccordionSection(
-                          header: Text(
-                              name, style: TextStyle(color: Colors.white)),
-                          content: Column(
-                              children:
-                              files.map((file) =>
-                                  Row(
-                                      mainAxisAlignment: MainAxisAlignment
-                                          .spaceBetween,
-                                      children: <Widget>[
-                                        Text(path.basename(file), style: TextStyle(color: Theme.of(context).colorScheme.primary)),
-                                        IconButton(
-                                            icon: new Icon(Icons.cancel),
-                                            tooltip: 'delete voice sample',
-                                            onPressed: () {
-                                              setState(() {
-                                                deleteVoiceSamples(
-                                                    directories[i],
-                                                    path.basename(file));
-                                              });
-                                            }
-                                        )
-                                      ]
-                                  )
-                              ).toList()
+          Card(
+            child: Padding(
+              padding: EdgeInsets.all(10.0),
+              child: Accordion(
+                headerBorderRadius: 50,
+                headerPadding: EdgeInsets.all(15.0),
+                children: [
+                  AccordionSection(
+                    header: Text(name, style: TextStyle(color: Colors.white)),
+                    content: Column(
+                      children: files
+                          .map(
+                            (file) => Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                Text(
+                                  path.basename(file),
+                                  style: TextStyle(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                  ),
+                                ),
+                                IconButton(
+                                  icon: Icon(Icons.cancel),
+                                  tooltip: 'delete voice sample',
+                                  onPressed: () {
+                                    setState(() {
+                                      deleteVoiceSamples(
+                                        directories[i],
+                                        path.basename(file),
+                                      );
+                                    });
+                                  },
+                                ),
+                              ],
+                            ),
                           )
-                      )
-                      ],
-                    )
-                )
-            ));
+                          .toList(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
       }
     }
     return namedVoices;
   }
 
-  List<Widget> stringToCard (List<String> list) {
-    return list.map((value)=>
-        Card(
+  List<Widget> stringToCard(List<String> list) {
+    return list
+        .map(
+          (value) => Card(
             child: Padding(
-                padding: EdgeInsets.all(10.0),
-                child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Text(value),
-                      IconButton(
-                          icon: new Icon(Icons.cancel),
-                          tooltip: 'delete PII',
-                          onPressed: () {
-                            setState(() {
-                                _PIIList.remove(value);
-                                _PIIWidgetList = stringToCard(list);
-                            });
-                          }
-                      )
-                    ]
-                )
-            )
+              padding: EdgeInsets.all(10.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Text(value),
+                  IconButton(
+                    icon: Icon(Icons.cancel),
+                    tooltip: 'delete PII',
+                    onPressed: () {
+                      setState(() {
+                        _PIIList.remove(value);
+                        _PIIWidgetList = stringToCard(list);
+                      });
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
         )
-    ).toList();
+        .toList();
   }
 
   List<DataRow> generateRows() {
     List<DataRow> rowList = [];
-    keyword_Event.forEach((key, value)=>
-      rowList.add(DataRow(cells: [
-        DataCell(Text(key)),
-        DataCell(Text(value)),
-        DataCell(IconButton(
-          icon: Icon(Icons.delete),
-          onPressed: (){
-            setState(() {
-              keyword_Event.remove(key);
-            });
-          },
-        ))
-      ]))
+    keyword_Event.forEach(
+      (key, value) => rowList.add(
+        DataRow(
+          cells: [
+            DataCell(Text(key)),
+            DataCell(Text(value)),
+            DataCell(
+              IconButton(
+                icon: Icon(Icons.delete),
+                onPressed: () {
+                  setState(() {
+                    keyword_Event.remove(key);
+                  });
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
     );
     return rowList;
   }
 
   Widget _buildToggleCard(
-      BuildContext context, {
-        required String name,
-        required bool value,
-        required Function(bool) onChanged,
-      }) {
+    BuildContext context, {
+    required String name,
+    required bool value,
+    required Function(bool) onChanged,
+  }) {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
@@ -313,9 +343,9 @@ class _NotetakerConfigurationPageState extends State<NotetakerConfigurationPage>
   }
 
   void deleteVoiceSamples(String directory, String fileName) async {
-      File sampleToDelete = File('$directory/$fileName');
-      sampleToDelete.deleteSync();
-      loadVoiceSamples();
+    File sampleToDelete = File('$directory/$fileName');
+    sampleToDelete.deleteSync();
+    loadVoiceSamples();
   }
 
   void loadVoiceSamples() async {
@@ -324,13 +354,17 @@ class _NotetakerConfigurationPageState extends State<NotetakerConfigurationPage>
     setState(() {
       _directories = [];
     });
-    if(directory != null) {
-      final voiceSampleDirectory = Directory('${directory.path}/voice_samples/');
+    if (directory != null) {
+      final voiceSampleDirectory = Directory(
+        '${directory.path}/voice_samples/',
+      );
       // Check if the directory exists
       if (await voiceSampleDirectory.exists()) {
         // List all entities (files and subdirectories) in the directory
         await for (var entity in voiceSampleDirectory.list(
-            recursive: false, followLinks: false)) {
+          recursive: false,
+          followLinks: false,
+        )) {
           if (entity is Directory) {
             // Read the file content
             setState(() {
@@ -348,9 +382,7 @@ class _NotetakerConfigurationPageState extends State<NotetakerConfigurationPage>
   }
 
   Future<bool> _isEncoderSupported(AudioEncoder encoder) async {
-    final isSupported = await _audioRecorder.isEncoderSupported(
-      encoder,
-    );
+    final isSupported = await _audioRecorder.isEncoderSupported(encoder);
 
     if (!isSupported) {
       debugPrint('${encoder.name} is not supported on this platform.');
@@ -367,43 +399,44 @@ class _NotetakerConfigurationPageState extends State<NotetakerConfigurationPage>
   }
 
   Future<void> _startListening() async {
-      if (await _audioRecorder.hasPermission()) {
-        const encoder = AudioEncoder.pcm16bits;
+    if (await _audioRecorder.hasPermission()) {
+      const encoder = AudioEncoder.pcm16bits;
 
-        if (!await _isEncoderSupported(encoder)) {
-          return;
-        }
-
-        final devs = await _audioRecorder.listInputDevices();
-        debugPrint(devs.toString());
-
-        const config = RecordConfig(
-          encoder: encoder,
-          sampleRate: 16000,
-          numChannels: 1,
-        );
-        recordedData = [];
-        final stream = await _audioRecorder.startStream(config);
-        stream.listen(
-              (data) {
-            recordedData.addAll(data);
-          },
-          onDone: () {
-            print('stream stopped.');
-          },
-        );
+      if (!await _isEncoderSupported(encoder)) {
+        return;
       }
+
+      final devs = await _audioRecorder.listInputDevices();
+      debugPrint(devs.toString());
+
+      const config = RecordConfig(
+        encoder: encoder,
+        sampleRate: 16000,
+        numChannels: 1,
+      );
+      recordedData = [];
+      final stream = await _audioRecorder.startStream(config);
+      stream.listen(
+        (data) {
+          recordedData.addAll(data);
+        },
+        onDone: () {
+          print('stream stopped.');
+        },
+      );
+    }
   }
 
-  void _stopListening() async{
+  void _stopListening() async {
     await _audioRecorder.stop();
   }
 
   Future<void> saveFile(List<int> data, int sampleRate, String file) async {
     Directory? directory = await getExternalStorageDirectory();
     String filename = "";
-    if(directory != null) {
-      filename = "${directory.path}/voice_samples/$file/$file-${DateTime.now().millisecondsSinceEpoch}.wav";
+    if (directory != null) {
+      filename =
+          "${directory.path}/voice_samples/$file/$file-${DateTime.now().millisecondsSinceEpoch}.wav";
       File recordedFile = await File(filename).create(recursive: true);
 
       var channels = 1;
@@ -451,7 +484,7 @@ class _NotetakerConfigurationPageState extends State<NotetakerConfigurationPage>
         (size >> 8) & 0xff,
         (size >> 16) & 0xff,
         (size >> 24) & 0xff,
-        ...data
+        ...data,
       ]);
       recordedFile.writeAsBytesSync(header, flush: true, mode: FileMode.write);
       loadVoiceSamples();
@@ -462,21 +495,29 @@ class _NotetakerConfigurationPageState extends State<NotetakerConfigurationPage>
 
   Future<void> _fetchConfig(int patientId) async {
     try {
-      final config = await NotetakerConfigService.getUserNotetakerConfig(patientId, context);
+      final config = await NotetakerConfigService.getUserNotetakerConfig(
+        patientId,
+        context,
+      );
       if (config != null) {
         setState(() {
           _currentConfig = config;
           _isEnabled = config.isEnabled;
           _permitCaregiverAccess = config.permitCaregiverAccess;
-          _PIIList = config.triggerKeywords.where((trigger)=> trigger.keyword.contains("PII_"))
-              .map((trigger)=> trigger.keyword.replaceAll("PII_", "")).toList();
+          _PIIList = config.triggerKeywords
+              .where((trigger) => trigger.keyword.contains("PII_"))
+              .map((trigger) => trigger.keyword.replaceAll("PII_", ""))
+              .toList();
           keyword_Event = {};
-          config.triggerKeywords.where((trigger)=> !trigger.keyword.contains("PII_")).forEach((trigger)=>
-          keyword_Event[trigger.keyword] = trigger.event_type
-          );
+          config.triggerKeywords
+              .where((trigger) => !trigger.keyword.contains("PII_"))
+              .forEach(
+                (trigger) =>
+                    keyword_Event[trigger.keyword] = trigger.event_type,
+              );
           _PIIWidgetList = stringToCard(_PIIList);
         });
-        if(!kIsWeb) {
+        if (!kIsWeb) {
           loadVoiceSamples();
         }
       }
@@ -505,13 +546,20 @@ class _NotetakerConfigurationPageState extends State<NotetakerConfigurationPage>
         final userRole = _user!.role;
         _isPatient = userRole.toUpperCase() == 'PATIENT';
       });
-      if(!_isPatient && _user!.caregiverId != null) {
-        http.Response patientResponse = await ApiService.getCaregiverPatients(_user!.caregiverId!);
+      if (!_isPatient && _user!.caregiverId != null) {
+        http.Response patientResponse = await ApiService.getCaregiverPatients(
+          _user!.caregiverId!,
+        );
         setState(() {
-          _patientList = (jsonDecode(patientResponse.body) as List<dynamic>).map((patientWLink)=> {
-            'id': patientWLink['patient']['id'].toString(),
-            'name': '${patientWLink['patient']['firstName']} ${patientWLink['patient']['lastName']}'
-          }).toList();
+          _patientList = (jsonDecode(patientResponse.body) as List<dynamic>)
+              .map(
+                (patientWLink) => {
+                  'id': patientWLink['patient']['id'].toString(),
+                  'name':
+                      '${patientWLink['patient']['firstName']} ${patientWLink['patient']['lastName']}',
+                },
+              )
+              .toList();
         });
       }
     } catch (e) {
@@ -525,7 +573,7 @@ class _NotetakerConfigurationPageState extends State<NotetakerConfigurationPage>
       }
     }
 
-    if(_isPatient) {
+    if (_isPatient) {
       _fetchConfig(_user!.patientId!);
     } else {
       setState(() {
@@ -539,11 +587,21 @@ class _NotetakerConfigurationPageState extends State<NotetakerConfigurationPage>
     try {
       if (_user == null) throw Exception('User not found');
       List<PatientNotetakerKeyword> keywordList = [];
-      _PIIList.forEach((pii)=>keywordList.add(PatientNotetakerKeyword(keyword:'PII_$pii', event_type: 'ALERT')));
-      keyword_Event.forEach((keyword,event)=>keywordList.add(PatientNotetakerKeyword(keyword:keyword, event_type: event)));
+      for (var pii in _PIIList) {
+        keywordList.add(
+          PatientNotetakerKeyword(keyword: 'PII_$pii', event_type: 'ALERT'),
+        );
+      }
+      keyword_Event.forEach(
+        (keyword, event) => keywordList.add(
+          PatientNotetakerKeyword(keyword: keyword, event_type: event),
+        ),
+      );
       final config = PatientNotetakerConfigDTO(
         id: _currentConfig?.id,
-        patientId: _isPatient ? _user!.patientId! : int.parse(_selectedPatientId ?? '-1'),
+        patientId: _isPatient
+            ? _user!.patientId!
+            : int.parse(_selectedPatientId ?? '-1'),
         isEnabled: _isEnabled,
         permitCaregiverAccess: _permitCaregiverAccess,
         triggerKeywords: keywordList,
@@ -559,7 +617,9 @@ class _NotetakerConfigurationPageState extends State<NotetakerConfigurationPage>
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Text('Notetaker configuration saved successfully!'),
+              content: const Text(
+                'Notetaker configuration saved successfully!',
+              ),
               backgroundColor: Colors.green,
             ),
           );
@@ -612,219 +672,228 @@ class _NotetakerConfigurationPageState extends State<NotetakerConfigurationPage>
 
   Widget _buildPatientSection(ThemeData theme) {
     return _buildSection(
-        theme,
-        'Select patient',
-        Icons.person, // Changed from Icons.psychology for better compatibility
-        [
-          DropdownButtonFormField<String>(
-            value: _selectedPatientId,
-            decoration: InputDecoration(labelText: 'Select an option'),
-            items: _patientList
-                .map((patient) => DropdownMenuItem(
-              value: patient['id'],
-              child: Text(patient['name']!),
-            )).toList(),
-            onChanged: (value) {
-              setState(() {
-                _selectedPatientId = value!;
-              });
-              _fetchConfig(int.parse(_selectedPatientId!));
-            },
-            validator: (value) {
-              if (value == null) {
-                return 'Please select an option';
-              }
-              return null;
-            },
-          ),
-        ]
+      theme,
+      'Select patient',
+      Icons.person, // Changed from Icons.psychology for better compatibility
+      [
+        DropdownButtonFormField<String>(
+          initialValue: _selectedPatientId,
+          decoration: InputDecoration(labelText: 'Select an option'),
+          items: _patientList
+              .map(
+                (patient) => DropdownMenuItem(
+                  value: patient['id'],
+                  child: Text(patient['name']!),
+                ),
+              )
+              .toList(),
+          onChanged: (value) {
+            setState(() {
+              _selectedPatientId = value!;
+            });
+            _fetchConfig(int.parse(_selectedPatientId!));
+          },
+          validator: (value) {
+            if (value == null) {
+              return 'Please select an option';
+            }
+            return null;
+          },
+        ),
+      ],
     );
   }
 
   Widget _buildToggleSection(ThemeData theme) {
     return _buildSection(
-        theme,
-        'Enable Usage/Access',
-        Icons.person, // Changed from Icons.psychology for better compatibility
-        [
-          _buildToggleCard(context, name: 'Enable Notetaker Assistant', value: _isEnabled, onChanged: (value)=>{setState(() {
-            _isEnabled = !_isEnabled;
-          })}),
-          SizedBox(height: 16),
-          _buildToggleCard(context, name: 'Enable Caregiver Access', value: _permitCaregiverAccess, onChanged: (value)=>{setState(() {
-            _permitCaregiverAccess = !_permitCaregiverAccess;
-          })})
-        ]
+      theme,
+      'Enable Usage/Access',
+      Icons.person, // Changed from Icons.psychology for better compatibility
+      [
+        _buildToggleCard(
+          context,
+          name: 'Enable Notetaker Assistant',
+          value: _isEnabled,
+          onChanged: (value) => {
+            setState(() {
+              _isEnabled = !_isEnabled;
+            }),
+          },
+        ),
+        SizedBox(height: 16),
+        _buildToggleCard(
+          context,
+          name: 'Enable Caregiver Access',
+          value: _permitCaregiverAccess,
+          onChanged: (value) => {
+            setState(() {
+              _permitCaregiverAccess = !_permitCaregiverAccess;
+            }),
+          },
+        ),
+      ],
     );
   }
 
   Widget _buildPIISection(ThemeData theme) {
-    return _buildSection(
-      theme,
-      'PII terms',
-      Icons.warning,
-      [
-        SizedBox(
-            height: 250,
-            child: ListView.builder(
-              itemCount: _PIIWidgetList.length,
-              itemBuilder: (context, index) {
-                return _PIIWidgetList[index];
-              },
-            )),
-        TextButton.icon(
-            onPressed: () {
-              _PIIController.clear();
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return Expanded(
-                    child: SimpleDialog(
-                        title: Text("Add a PII term"),
-                        children: <Widget> [
-                          Padding(
-                            padding: EdgeInsets.all(10.0),
-                            child: TextFormField(
-                              controller: _PIIController,
-                              decoration: InputDecoration(labelText: 'Enter text'),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'This field is required';
-                                }
-                                return null;
-                              },
-                            ),
-                          ),
-                          SizedBox(height: 16),
-                          SimpleDialogOption(
-                            onPressed: () {
-                              setState(() {
-                                _PIIList.add(_PIIController.text);
-                                _PIIWidgetList = stringToCard(_PIIList);
-                              });
-                              Navigator.of(context).pop();
-                              },
-                            child:const Text('Add'),
-                          )
-                        ]
+    return _buildSection(theme, 'PII terms', Icons.warning, [
+      SizedBox(
+        height: 250,
+        child: ListView.builder(
+          itemCount: _PIIWidgetList.length,
+          itemBuilder: (context, index) {
+            return _PIIWidgetList[index];
+          },
+        ),
+      ),
+      TextButton.icon(
+        onPressed: () {
+          _PIIController.clear();
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return Expanded(
+                child: SimpleDialog(
+                  title: Text("Add a PII term"),
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.all(10.0),
+                      child: TextFormField(
+                        controller: _PIIController,
+                        decoration: InputDecoration(labelText: 'Enter text'),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'This field is required';
+                          }
+                          return null;
+                        },
+                      ),
                     ),
-                  );
-                },
+                    SizedBox(height: 16),
+                    SimpleDialogOption(
+                      onPressed: () {
+                        setState(() {
+                          _PIIList.add(_PIIController.text);
+                          _PIIWidgetList = stringToCard(_PIIList);
+                        });
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text('Add'),
+                    ),
+                  ],
+                ),
               );
             },
-            icon: Icon(Icons.add, size: 24),
-            label: Text('Add PII'),
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.blue,
-            )
-        ),
-      ],
-    );
+          );
+        },
+        icon: Icon(Icons.add, size: 24),
+        label: Text('Add PII'),
+        style: TextButton.styleFrom(foregroundColor: Colors.blue),
+      ),
+    ]);
   }
 
   Widget _buildKeywordSection(ThemeData theme) {
-    return _buildSection(
-      theme,
-      'Keywords',
-      Icons.key,
-      [
-        SizedBox(
-          height: 250,
-          child: LayoutBuilder(builder: (context, constraints) {
+    return _buildSection(theme, 'Keywords', Icons.key, [
+      SizedBox(
+        height: 250,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
             return SingleChildScrollView(
-                scrollDirection: Axis.vertical,
-                child: ConstrainedBox(
-                    constraints: BoxConstraints(minWidth: constraints.maxWidth),
-                    child:
-                      DataTable(
-                        columnSpacing: 16.0,
-                        columns: [
-                          DataColumn(label: Expanded(child: Text("Keyword"))),
-                          DataColumn(label: Expanded(child: Text("Event Type"))),
-                          DataColumn(label: Expanded(child: Text("")))
-                        ],
-                        rows: generateRows()
-                      )
-                )
+              scrollDirection: Axis.vertical,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minWidth: constraints.maxWidth),
+                child: DataTable(
+                  columnSpacing: 16.0,
+                  columns: [
+                    DataColumn(label: Expanded(child: Text("Keyword"))),
+                    DataColumn(label: Expanded(child: Text("Event Type"))),
+                    DataColumn(label: Expanded(child: Text(""))),
+                  ],
+                  rows: generateRows(),
+                ),
+              ),
             );
-          })
+          },
         ),
-        SizedBox(height: 16,),
-        TextButton.icon(
-            onPressed: () {
-              _keywordController.clear();
-              _selectedDropdownValue = null;
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return Expanded(
-                    child: SimpleDialog(
-                        title: Text("Add a keyword"),
-                        children: <Widget> [
-                          Padding(
-                          padding: EdgeInsets.all(10.0),
-                          child:
-                            TextFormField(
-                              controller: _keywordController,
-                              decoration: InputDecoration(labelText: 'Enter text'),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'This field is required';
-                                }
-                                return null;
-                              },
-                            )
-                          ),
-                          SizedBox(width: 12),
-                          Padding(
-                            padding: EdgeInsets.all(10.0),
-                            child: DropdownButtonFormField<String>(
-                              value: _selectedDropdownValue,
-                              decoration: InputDecoration(labelText: 'Select an option'),
-                              items: ['ALERT', 'TASK']
-                                  .map((option) => DropdownMenuItem(
+      ),
+      SizedBox(height: 16),
+      TextButton.icon(
+        onPressed: () {
+          _keywordController.clear();
+          _selectedDropdownValue = null;
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return Expanded(
+                child: SimpleDialog(
+                  title: Text("Add a keyword"),
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.all(10.0),
+                      child: TextFormField(
+                        controller: _keywordController,
+                        decoration: InputDecoration(labelText: 'Enter text'),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'This field is required';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                    SizedBox(width: 12),
+                    Padding(
+                      padding: EdgeInsets.all(10.0),
+                      child: DropdownButtonFormField<String>(
+                        initialValue: _selectedDropdownValue,
+                        decoration: InputDecoration(
+                          labelText: 'Select an option',
+                        ),
+                        items: ['ALERT', 'TASK']
+                            .map(
+                              (option) => DropdownMenuItem(
                                 value: option,
                                 child: Text(option),
-                              ))
-                                  .toList(),
-                              onChanged: (value) {
-                                setState(() {
-                                  _selectedDropdownValue = value;
-                                });
-                              },
-                              validator: (value) {
-                                if (value == null) {
-                                  return 'Please select an option';
-                                }
-                                return null;
-                              },
-                            ),
-                          ),
-                          SimpleDialogOption(
-                            onPressed: () {
-                              setState(() {
-                                if(_selectedDropdownValue != null) {
-                                  keyword_Event[_keywordController.text] = _selectedDropdownValue as String;
-                                }
-                              });
-                              Navigator.of(context).pop();
-                              },
-                            child:const Text('Add'),
-                          )
-                        ]
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedDropdownValue = value;
+                          });
+                        },
+                        validator: (value) {
+                          if (value == null) {
+                            return 'Please select an option';
+                          }
+                          return null;
+                        },
+                      ),
                     ),
-                  );
-                },
+                    SimpleDialogOption(
+                      onPressed: () {
+                        setState(() {
+                          if (_selectedDropdownValue != null) {
+                            keyword_Event[_keywordController.text] =
+                                _selectedDropdownValue as String;
+                          }
+                        });
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text('Add'),
+                    ),
+                  ],
+                ),
               );
             },
-            icon: Icon(Icons.add, size: 24),
-            label: Text('Add Keyword'),
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.blue,
-            )
-        ),
-      ],
-    );
+          );
+        },
+        icon: Icon(Icons.add, size: 24),
+        label: Text('Add Keyword'),
+        style: TextButton.styleFrom(foregroundColor: Colors.blue),
+      ),
+    ]);
   }
 
   Widget _buildRecordStopControl() {
@@ -846,7 +915,9 @@ class _NotetakerConfigurationPageState extends State<NotetakerConfigurationPage>
         child: InkWell(
           child: SizedBox(width: 56, height: 56, child: icon),
           onTap: () {
-              (_recordState != RecordState.stop) ? _stopListening() : _startListening();
+            (_recordState != RecordState.stop)
+                ? _stopListening()
+                : _startListening();
           },
         ),
       ),
@@ -862,146 +933,137 @@ class _NotetakerConfigurationPageState extends State<NotetakerConfigurationPage>
   }
 
   Widget _buildVoiceSampleSection(ThemeData theme) {
-    if(kIsWeb) {
-      return _buildSection(
-          theme,
-          'Manage Voice Sample',
-          Icons.voice_chat,
-          [
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: Theme
-                      .of(context)
-                      .dividerColor,
-                  width: 2,
-                ),
-                borderRadius: BorderRadius.circular(8),
-                color: Theme
-                    .of(context)
-                    .colorScheme
-                    .surfaceContainerHighest
-                    .withOpacity(0.1),
+    if (kIsWeb) {
+      return _buildSection(theme, 'Manage Voice Sample', Icons.voice_chat, [
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            border: Border.all(color: Theme.of(context).dividerColor, width: 2),
+            borderRadius: BorderRadius.circular(8),
+            color: Theme.of(
+              context,
+            ).colorScheme.surfaceContainerHighest.withOpacity(0.1),
+          ),
+          child: Column(
+            children: [
+              Icon(
+                Icons.cancel_outlined,
+                color: theme.colorScheme.primary,
+                size: 48,
               ),
-              child: Column(
-                children: [
-                  Icon(Icons.cancel_outlined, color: theme.colorScheme.primary,
-                      size: 48),
-                  const SizedBox(width: 12),
-                  Text(
-                    'This feature is not available on the web application',
-                    style: TextStyle(
-                      fontSize: 36,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  )
-                ],
+              const SizedBox(width: 12),
+              Text(
+                'This feature is not available on the web application',
+                style: TextStyle(fontSize: 36, fontWeight: FontWeight.w600),
               ),
-            ),
-          ]
-      );
+            ],
+          ),
+        ),
+      ]);
     } else {
-      return _buildSection(
-        theme,
-        'Manage Voice Sample',
-        Icons.voice_chat,
-        [
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: Theme
-                    .of(context)
-                    .dividerColor,
-                width: 2,
+      return _buildSection(theme, 'Manage Voice Sample', Icons.voice_chat, [
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            border: Border.all(color: Theme.of(context).dividerColor, width: 2),
+            borderRadius: BorderRadius.circular(8),
+            color: Theme.of(
+              context,
+            ).colorScheme.surfaceContainerHighest.withOpacity(0.1),
+          ),
+          child: Column(
+            children: [
+              _buildInfoCard(
+                theme,
+                'Tap the button below to start voice recognition. '
+                'The more voice samples provided the more accurate speaker identification will be.'
+                'Try saying the phrases: "The birch canoe slid on the smooth planks", "Glue the sheet to the dark blue background.", "It’s easy to tell the depth of a well.", '
+                '"These days a chicken leg is a rare dish."',
               ),
-              borderRadius: BorderRadius.circular(8),
-              color: Theme
-                  .of(context)
-                  .colorScheme
-                  .surfaceContainerHighest
-                  .withOpacity(0.1),
-            ),
-            child: Column(
-              children: [
-                _buildInfoCard(theme, 'Tap the button below to start voice recognition. '
-                    'The more voice samples provided the more accurate speaker identification will be.'
-                    'Try saying the phrases: \"The birch canoe slid on the smooth planks\", \"Glue the sheet to the dark blue background.\", \"It’s easy to tell the depth of a well.\", '
-                    '\"These days a chicken leg is a rare dish.\"'),
-                const SizedBox(height: 16),
-                Row(
+              const SizedBox(height: 16),
+              Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   _buildRecordStopControl(),
                   const SizedBox(width: 16),
                   _buildText(),
-                ]),
-                ElevatedButton(onPressed: recordedData.isEmpty ? null : () {
-                  _fileNameController.clear();
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return Expanded(
-                        child: SimpleDialog(
-                            title: Text("Enter your name"),
-                            children: <Widget> [
-                              Padding(
-                                padding: EdgeInsets.all(10.0),
-                                child: TextFormField(
-                                  controller: _fileNameController,
-                                  decoration: InputDecoration(labelText: 'Enter text'),
-                                  validator: (value) {
-                                    if (value == null || value.isEmpty) {
-                                      return 'This field is required';
-                                    }
-                                    return null;
-                                  },
-                                ),
+                ],
+              ),
+              ElevatedButton(
+                onPressed: recordedData.isEmpty
+                    ? null
+                    : () {
+                        _fileNameController.clear();
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return Expanded(
+                              child: SimpleDialog(
+                                title: Text("Enter your name"),
+                                children: <Widget>[
+                                  Padding(
+                                    padding: EdgeInsets.all(10.0),
+                                    child: TextFormField(
+                                      controller: _fileNameController,
+                                      decoration: InputDecoration(
+                                        labelText: 'Enter text',
+                                      ),
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'This field is required';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                  ),
+                                  SizedBox(height: 16),
+                                  SimpleDialogOption(
+                                    onPressed: () {
+                                      if (_fileNameController.text.isNotEmpty) {
+                                        saveFile(
+                                          recordedData,
+                                          _sampleRate,
+                                          _fileNameController.text,
+                                        );
+                                        Navigator.of(context).pop();
+                                      }
+                                    },
+                                    child: const Text('Add'),
+                                  ),
+                                ],
                               ),
-                              SizedBox(height: 16),
-                              SimpleDialogOption(
-                                onPressed: () {
-                                  if(_fileNameController.text.isNotEmpty) {
-                                    saveFile(recordedData, _sampleRate, _fileNameController.text);
-                                    Navigator.of(context).pop();
-                                  }
-                                },
-                                child:const Text('Add'),
-                              )
-                            ]
-                        ),
-                      );
-                    },
-                  );
-                }, child: Text('Save File')),
-                const SizedBox(height: 8),
-              ],
-            ),
+                            );
+                          },
+                        );
+                      },
+                child: Text('Save File'),
+              ),
+              const SizedBox(height: 8),
+            ],
           ),
-          const SizedBox(height: 24),
-          SizedBox(
-              height: 250,
-              child: ListView.builder(
-                itemCount: _DirectoryWidgetList.length,
-                itemBuilder: (context, index) {
-                  return _DirectoryWidgetList[index];
-                },
-              )
+        ),
+        const SizedBox(height: 24),
+        SizedBox(
+          height: 250,
+          child: ListView.builder(
+            itemCount: _DirectoryWidgetList.length,
+            itemBuilder: (context, index) {
+              return _DirectoryWidgetList[index];
+            },
           ),
-        ],
-      );
+        ),
+      ]);
     }
   }
 
   Widget _buildSection(
-      ThemeData theme,
-      String title,
-      IconData icon,
-      List<Widget> children,
-      ) {
+    ThemeData theme,
+    String title,
+    IconData icon,
+    List<Widget> children,
+  ) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(

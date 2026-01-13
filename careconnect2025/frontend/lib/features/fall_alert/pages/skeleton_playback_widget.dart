@@ -11,10 +11,7 @@ import 'package:http/http.dart' as http;
 class SkeletonPlaybackWidget extends StatefulWidget {
   final Map<String, dynamic> sampleResponse;
 
-  const SkeletonPlaybackWidget({
-    Key? key,
-    required this.sampleResponse,
-  }) : super(key: key);
+  const SkeletonPlaybackWidget({super.key, required this.sampleResponse});
 
   @override
   State<SkeletonPlaybackWidget> createState() => _SkeletonPlaybackWidgetState();
@@ -126,32 +123,36 @@ class _SkeletonPlaybackWidgetState extends State<SkeletonPlaybackWidget>
             confidence: prob.clamp(0, 255) / 255.0,
           );
         }
-        loaded.add(FrameData(points: framePoints, durationMs: math.max(16, msDelta)));
+        loaded.add(
+          FrameData(points: framePoints, durationMs: math.max(16, msDelta)),
+        );
       }
 
       ui.Image? bg;
-     try {
-  final http.Response resp = await http.get(Uri.parse(bgUrl));
+      try {
+        final http.Response resp = await http.get(Uri.parse(bgUrl));
 
-  // --- ADD THESE LINES ---
-  debugPrint("Response Status Code: ${resp.statusCode}");
-  debugPrint("Response Body: ${resp.body}");
-  // ---------------------
+        // --- ADD THESE LINES ---
+        debugPrint("Response Status Code: ${resp.statusCode}");
+        debugPrint("Response Body: ${resp.body}");
+        // ---------------------
 
-  // If the status code is not 200, the rest will fail.
-  if (resp.statusCode == 200) {
-    final ui.Codec codec = await ui.instantiateImageCodec(resp.bodyBytes);
-    final ui.FrameInfo fi = await codec.getNextFrame();
-    bg = fi.image;
-  } else {
-    debugPrint("Failed to load image. Status code: ${resp.statusCode}");
-  }
-} catch (e) {
-  debugPrint("Background load error: $e");
-}
+        // If the status code is not 200, the rest will fail.
+        if (resp.statusCode == 200) {
+          final ui.Codec codec = await ui.instantiateImageCodec(resp.bodyBytes);
+          final ui.FrameInfo fi = await codec.getNextFrame();
+          bg = fi.image;
+        } else {
+          debugPrint("Failed to load image. Status code: ${resp.statusCode}");
+        }
+      } catch (e) {
+        debugPrint("Background load error: $e");
+      }
       // Match JS setInterval behavior with a uniform frame time
       final totalMs = loaded.fold<int>(0, (s, f) => s + f.durationMs);
-      final uniform = (totalMs / math.max(1, loaded.length)).clamp(16, 200).round();
+      final uniform = (totalMs / math.max(1, loaded.length))
+          .clamp(16, 200)
+          .round();
       final normalized = loaded
           .map((f) => FrameData(points: f.points, durationMs: uniform))
           .toList();
@@ -301,8 +302,10 @@ class SkeletonPainter extends CustomPainter {
 
     // Fit original alert size inside current canvas
     final FittedSizes fs = applyBoxFit(BoxFit.contain, originalSize, size);
-    final Rect outputRect =
-        Alignment.center.inscribe(fs.destination, Offset.zero & size);
+    final Rect outputRect = Alignment.center.inscribe(
+      fs.destination,
+      Offset.zero & size,
+    );
     final double scale = fs.destination.width / fs.source.width;
     final Offset offset = outputRect.topLeft;
 
@@ -382,7 +385,11 @@ class SkeletonPainter extends CustomPainter {
   }
 
   _ScaledPoint? _pt(
-      Map<int, KeyPoint> points, int idx, double scale, Offset offset) {
+    Map<int, KeyPoint> points,
+    int idx,
+    double scale,
+    Offset offset,
+  ) {
     final p = points[idx];
     if (p == null) return null;
     return _ScaledPoint(
@@ -391,8 +398,14 @@ class SkeletonPainter extends CustomPainter {
     );
   }
 
-  void _fillTorso(Canvas canvas, _ScaledPoint? ls, _ScaledPoint? rs,
-      _ScaledPoint? rh, _ScaledPoint? lh, Color color) {
+  void _fillTorso(
+    Canvas canvas,
+    _ScaledPoint? ls,
+    _ScaledPoint? rs,
+    _ScaledPoint? rh,
+    _ScaledPoint? lh,
+    Color color,
+  ) {
     if (ls == null || rs == null || rh == null || lh == null) return;
     final path = Path()
       ..moveTo(ls.offset.dx, ls.offset.dy)
@@ -406,8 +419,14 @@ class SkeletonPainter extends CustomPainter {
     canvas.drawPath(path, p);
   }
 
-  void _strokeSeg(Canvas canvas, Paint paint, _ScaledPoint? a, _ScaledPoint? b,
-      Color color, double width) {
+  void _strokeSeg(
+    Canvas canvas,
+    Paint paint,
+    _ScaledPoint? a,
+    _ScaledPoint? b,
+    Color color,
+    double width,
+  ) {
     if (a == null || b == null) return;
     final double alpha = (0.5 * (a.confidence + b.confidence)).clamp(0.25, 1.0);
     paint
@@ -419,8 +438,13 @@ class SkeletonPainter extends CustomPainter {
     canvas.drawLine(a.offset, b.offset, paint);
   }
 
-  void _dot(Canvas canvas, Paint paint, _ScaledPoint? p, double radius,
-      Color color) {
+  void _dot(
+    Canvas canvas,
+    Paint paint,
+    _ScaledPoint? p,
+    double radius,
+    Color color,
+  ) {
     if (p == null) return;
     paint
       ..color = color.withOpacity(p.confidence.clamp(0.25, 1.0))
@@ -428,8 +452,14 @@ class SkeletonPainter extends CustomPainter {
     canvas.drawCircle(p.offset, radius, paint);
   }
 
-  void _drawHeadStroke(Canvas canvas, Paint paint, _ScaledPoint? head,
-      _ScaledPoint? neck, Color color, double lineWidth) {
+  void _drawHeadStroke(
+    Canvas canvas,
+    Paint paint,
+    _ScaledPoint? head,
+    _ScaledPoint? neck,
+    Color color,
+    double lineWidth,
+  ) {
     if (head == null || neck == null) return;
     final dx = head.offset.dx - neck.offset.dx;
     final dy = head.offset.dy - neck.offset.dy;

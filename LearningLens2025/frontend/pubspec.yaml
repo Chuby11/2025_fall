@@ -1,7 +1,7 @@
 name: learninglens_app
 description: A new Flutter project.
 
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
 version: 0.0.1+1
 
@@ -17,7 +17,7 @@ dependencies:
       url: https://github.com/Telosnex/fllama.git
       ref: main
 
-  editable: ^2.0.0  
+  editable: ^2.0.0
   flutter_dotenv: ^5.1.0
   xml: ^6.2.2
   http: ^1.2.1
@@ -57,7 +57,6 @@ dev_dependencies:
     sdk: flutter
 
   flutter_lints: ^5.0.0
-
 
 flutter:
   assets:

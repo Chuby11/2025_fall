@@ -108,13 +108,16 @@ class _AddMedicationModalState extends State<AddMedicationModal> {
                         onPressed: () {
                           showDialog(
                             context: context,
-                            builder: (context) => const AIChatModal(role: 'patient'),
+                            builder: (context) =>
+                                const AIChatModal(role: 'patient'),
                           );
                         },
                         icon: const Icon(Icons.smart_toy, size: 16),
                         label: const Text('Use AI Service'),
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: Theme.of(context).colorScheme.primary,
+                          foregroundColor: Theme.of(
+                            context,
+                          ).colorScheme.primary,
                           side: BorderSide(
                             color: Theme.of(context).colorScheme.primary,
                           ),
@@ -163,7 +166,7 @@ class _AddMedicationModalState extends State<AddMedicationModal> {
                     ),
                     const SizedBox(height: 8),
                     DropdownButtonFormField<String>(
-                      value: _selectedFrequency,
+                      initialValue: _selectedFrequency,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -412,7 +415,9 @@ class _AddMedicationModalState extends State<AddMedicationModal> {
                                 style: Theme.of(context).textTheme.bodyLarge
                                     ?.copyWith(
                                       fontWeight: FontWeight.w600,
-                                      color: Theme.of(context).colorScheme.onPrimary,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onPrimary,
                                     ),
                               ),
                       ),
@@ -451,7 +456,9 @@ class _AddMedicationModalState extends State<AddMedicationModal> {
           decoration: InputDecoration(
             hintText: hintText,
             hintStyle: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.5),
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
@@ -484,9 +491,9 @@ class _AddMedicationModalState extends State<AddMedicationModal> {
       children: [
         Text(
           label,
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500),
         ),
         const SizedBox(height: 8),
         InkWell(
@@ -512,7 +519,9 @@ class _AddMedicationModalState extends State<AddMedicationModal> {
                   style: TextStyle(
                     color: date != null
                         ? Theme.of(context).colorScheme.onSurface
-                        : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                        : Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.5),
                   ),
                 ),
               ],
@@ -555,7 +564,8 @@ class _AddMedicationModalState extends State<AddMedicationModal> {
           'medicationType': _selectedMedicationType.name,
           if (_prescribedByController.text.isNotEmpty)
             'prescribedBy': _prescribedByController.text,
-          if (_prescribedDate != null) 'prescribedDate': formatDate(_prescribedDate),
+          if (_prescribedDate != null)
+            'prescribedDate': formatDate(_prescribedDate),
           if (_startDate != null) 'startDate': formatDate(_startDate),
           if (_endDate != null) 'endDate': formatDate(_endDate),
           if (_notesController.text.isNotEmpty) 'notes': _notesController.text,
@@ -568,11 +578,12 @@ class _AddMedicationModalState extends State<AddMedicationModal> {
 
         if (response.statusCode == 200) {
           // Parse the response to get the created medication
-          final Map<String, dynamic> responseData =
-              response.body.isNotEmpty ? Map<String, dynamic>.from(
+          final Map<String, dynamic> responseData = response.body.isNotEmpty
+              ? Map<String, dynamic>.from(
                   // ignore: inference_failure_on_function_invocation
-                  jsonDecode(response.body)
-              ) : {};
+                  jsonDecode(response.body),
+                )
+              : {};
 
           final medication = Medication.fromJson(responseData);
 
@@ -600,7 +611,9 @@ class _AddMedicationModalState extends State<AddMedicationModal> {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('Failed to add medication: ${response.statusCode}'),
+                content: Text(
+                  'Failed to add medication: ${response.statusCode}',
+                ),
                 backgroundColor: Colors.red,
                 duration: const Duration(seconds: 3),
                 behavior: SnackBarBehavior.floating,

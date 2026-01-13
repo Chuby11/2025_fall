@@ -141,21 +141,27 @@ class _PatientDashboardState extends State<PatientDashboard> {
         patientName = combined.isNotEmpty ? combined : null;
       } catch (_) {}
 
-      final result = await _evvService.searchRecords(EvvSearchRequest(
-        patientName: patientName,
-        page: 0,
-        size: 200,
-        sortBy: 'dateOfService',
-        sortDirection: 'DESC',
-      ));
-      _pastEvvVisits = result.content.where((r) => r.patient?.id == patientId).toList();
+      final result = await _evvService.searchRecords(
+        EvvSearchRequest(
+          patientName: patientName,
+          page: 0,
+          size: 200,
+          sortBy: 'dateOfService',
+          sortDirection: 'DESC',
+        ),
+      );
+      _pastEvvVisits = result.content
+          .where((r) => r.patient?.id == patientId)
+          .toList();
 
       // Try caregiver scheduled visits endpoint and filter by patient
       try {
         final headers = await ApiService.getAuthHeaders();
         int? caregiverId;
         if (caregivers.isNotEmpty) {
-          caregiverId = (caregivers.first['id'] ?? caregivers.first['caregiverId']) as int?;
+          caregiverId =
+              (caregivers.first['id'] ?? caregivers.first['caregiverId'])
+                  as int?;
         } else {
           final cgRes = await http.get(
             Uri.parse('${ApiConstants.baseUrl}patients/$patientId/caregivers'),
@@ -163,32 +169,48 @@ class _PatientDashboardState extends State<PatientDashboard> {
           );
           if (cgRes.statusCode == 200) {
             final cgs = List<Map<String, dynamic>>.from(jsonDecode(cgRes.body));
-            if (cgs.isNotEmpty) caregiverId = (cgs.first['id'] ?? cgs.first['caregiverId']) as int?;
+            if (cgs.isNotEmpty)
+              caregiverId =
+                  (cgs.first['id'] ?? cgs.first['caregiverId']) as int?;
           }
         }
         if (caregiverId != null) {
-          final startStr = DateTime(now.year, now.month, now.day).toIso8601String().split('T')[0];
+          final startStr = DateTime(
+            now.year,
+            now.month,
+            now.day,
+          ).toIso8601String().split('T')[0];
           final endDate = now.add(const Duration(days: 30));
-          final endStr = DateTime(endDate.year, endDate.month, endDate.day).toIso8601String().split('T')[0];
-          final url = Uri.parse('${ApiConstants.baseUrl}scheduled-visits/caregiver/$caregiverId/range?startDate=$startStr&endDate=$endStr');
+          final endStr = DateTime(
+            endDate.year,
+            endDate.month,
+            endDate.day,
+          ).toIso8601String().split('T')[0];
+          final url = Uri.parse(
+            '${ApiConstants.baseUrl}scheduled-visits/caregiver/$caregiverId/range?startDate=$startStr&endDate=$endStr',
+          );
           final res = await http.get(url, headers: headers);
           if (res.statusCode == 200) {
             final List<dynamic> data = jsonDecode(res.body);
             bool matchesPatient(Map<String, dynamic> m) {
-              final target = patientId?.toString();
-              if (m.containsKey('patientId') && '${m['patientId']}' == target) return true;
-              if (m.containsKey('patient_id') && '${m['patient_id']}' == target) return true;
+              final target = patientId.toString();
+              if (m.containsKey('patientId') && '${m['patientId']}' == target)
+                return true;
+              if (m.containsKey('patient_id') && '${m['patient_id']}' == target)
+                return true;
               final p = m['patient'];
               if (p is Map && ('${p['id']}' == target)) return true;
               return false;
             }
+
             DateTime? parseWhen(Map<String, dynamic> m) {
               // Case 1: combined timestamp string
               final v = m['scheduledTime'] ?? m['scheduled_time'] ?? m['time'];
               if (v is String) {
                 // If this looks like HH:mm[:ss], combine with scheduledDate
                 if (RegExp(r'^\d{1,2}:\d{2}(:\d{2})?$').hasMatch(v)) {
-                  final d = (m['scheduledDate'] ?? m['scheduled_date']) as String?;
+                  final d =
+                      (m['scheduledDate'] ?? m['scheduled_date']) as String?;
                   if (d != null && RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(d)) {
                     return DateTime.tryParse('$d $v');
                   }
@@ -197,11 +219,15 @@ class _PatientDashboardState extends State<PatientDashboard> {
                 if (dt != null) return dt;
               }
               if (v is int) {
-                try { return DateTime.fromMillisecondsSinceEpoch(v); } catch (_) {}
+                try {
+                  return DateTime.fromMillisecondsSinceEpoch(v);
+                } catch (_) {}
               }
               // Case 2: separate date/time fields
-              final dateStr = (m['scheduledDate'] ?? m['scheduled_date']) as String?;
-              final timeStr = (m['scheduledTime'] ?? m['scheduled_time']) as String?;
+              final dateStr =
+                  (m['scheduledDate'] ?? m['scheduled_date']) as String?;
+              final timeStr =
+                  (m['scheduledTime'] ?? m['scheduled_time']) as String?;
               if (dateStr != null && timeStr != null) {
                 final date = DateTime.tryParse(dateStr);
                 if (date != null) {
@@ -226,10 +252,22 @@ class _PatientDashboardState extends State<PatientDashboard> {
               final id = raw['id'] ?? raw['visitId'] ?? raw['scheduledVisitId'];
               if (id != null && seenIds.contains(id)) continue;
               if (id != null) seenIds.add(id);
-              final service = raw['serviceType'] ?? raw['service_type'] ?? raw['service'] ?? 'Service';
-              normalized.add({'id': id, 'serviceType': service, 'scheduledTime': when.toIso8601String()});
+              final service =
+                  raw['serviceType'] ??
+                  raw['service_type'] ??
+                  raw['service'] ??
+                  'Service';
+              normalized.add({
+                'id': id,
+                'serviceType': service,
+                'scheduledTime': when.toIso8601String(),
+              });
             }
-            normalized.sort((a,b)=> DateTime.parse(a['scheduledTime']).compareTo(DateTime.parse(b['scheduledTime'])));
+            normalized.sort(
+              (a, b) => DateTime.parse(
+                a['scheduledTime'],
+              ).compareTo(DateTime.parse(b['scheduledTime'])),
+            );
             _upcomingEvvAppointments = normalized;
           }
         }
@@ -323,7 +361,8 @@ class _PatientDashboardState extends State<PatientDashboard> {
       activeAlerts.add(
         AlertNotification(
           type: AlertType.important,
-          message: 'Mood score below normal range. Consider contacting your healthcare provider.',
+          message:
+              'Mood score below normal range. Consider contacting your healthcare provider.',
         ),
       );
     }
@@ -334,7 +373,8 @@ class _PatientDashboardState extends State<PatientDashboard> {
       activeAlerts.add(
         AlertNotification(
           type: AlertType.reminder,
-          message: 'You have a missed medication dose. Please take it as soon as possible.',
+          message:
+              'You have a missed medication dose. Please take it as soon as possible.',
         ),
       );
     }
@@ -537,7 +577,7 @@ class _PatientDashboardState extends State<PatientDashboard> {
             builder: (context) => SizedBox(
               height: sheetHeight,
               child: AIChat(
-                role: 'patient', 
+                role: 'patient',
                 isModal: true,
                 patientId: user?.patientId, // Pass the actual patient ID
                 userId: user?.id,
@@ -956,9 +996,15 @@ class _PatientDashboardState extends State<PatientDashboard> {
             children: [
               Icon(Icons.event_available, color: theme.colorScheme.primary),
               const SizedBox(width: 8),
-              Text('Upcoming EVV Appointments', style: theme.textTheme.titleMedium),
+              Text(
+                'Upcoming EVV Appointments',
+                style: theme.textTheme.titleMedium,
+              ),
               const Spacer(),
-              IconButton(onPressed: _loadEvvSections, icon: const Icon(Icons.refresh)),
+              IconButton(
+                onPressed: _loadEvvSections,
+                icon: const Icon(Icons.refresh),
+              ),
             ],
           ),
           const SizedBox(height: 8),
@@ -966,14 +1012,20 @@ class _PatientDashboardState extends State<PatientDashboard> {
             const Text('No upcoming appointments.')
           else
             ..._upcomingEvvAppointments.take(5).map((v) {
-              final when = DateTime.tryParse(v['scheduledTime'] ?? '') ?? DateTime.now();
+              final when =
+                  DateTime.tryParse(v['scheduledTime'] ?? '') ?? DateTime.now();
               final service = v['serviceType'] ?? 'Service';
               return ListTile(
                 dense: true,
                 contentPadding: EdgeInsets.zero,
                 leading: const Icon(Icons.schedule),
-                title: Text(service, style: const TextStyle(fontWeight: FontWeight.w600)),
-                subtitle: Text('${when.month}/${when.day}/${when.year} • ${when.hour.toString().padLeft(2,'0')}:${when.minute.toString().padLeft(2,'0')}'),
+                title: Text(
+                  service,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+                subtitle: Text(
+                  '${when.month}/${when.day}/${when.year} • ${when.hour.toString().padLeft(2, '0')}:${when.minute.toString().padLeft(2, '0')}',
+                ),
               );
             }),
         ],
@@ -1013,7 +1065,10 @@ class _PatientDashboardState extends State<PatientDashboard> {
                   backgroundColor: Colors.green,
                   child: const Icon(Icons.check, color: Colors.white, size: 18),
                 ),
-                title: Text(r.serviceType, style: const TextStyle(fontWeight: FontWeight.w600)),
+                title: Text(
+                  r.serviceType,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
                 subtitle: Text('${date.month}/${date.day}/${date.year}'),
               );
             }),

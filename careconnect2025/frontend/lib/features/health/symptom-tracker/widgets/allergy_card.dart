@@ -7,12 +7,12 @@ class AllergyCard extends StatelessWidget {
   final String note;
 
   const AllergyCard({
-    Key? key,
+    super.key,
     required this.drug,
     required this.severity,
     required this.reaction,
     required this.note,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -80,7 +80,9 @@ class AllergyCard extends StatelessWidget {
           Text(
             note,
             style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.6),
               fontSize: 14,
             ),
           ),

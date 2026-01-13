@@ -15,7 +15,7 @@ class AllergiesTab extends StatefulWidget {
 }
 
 class _AllergiesTabState extends State<AllergiesTab> {
-  List<Map<String, dynamic>> _allergies = [];
+  final List<Map<String, dynamic>> _allergies = [];
   bool _isLoading = false;
 
   @override
@@ -34,14 +34,16 @@ class _AllergiesTabState extends State<AllergiesTab> {
 
       if (patientId == null) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Patient ID not found')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('Patient ID not found')));
         }
         return;
       }
 
-      final List<dynamic> allergies = await ApiService.fetchAllergies(patientId);
+      final List<dynamic> allergies = await ApiService.fetchAllergies(
+        patientId,
+      );
 
       setState(() {
         _allergies.clear();
@@ -59,9 +61,9 @@ class _AllergiesTabState extends State<AllergiesTab> {
       });
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to load allergies: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to load allergies: $e')));
       }
     } finally {
       if (mounted) {
@@ -77,9 +79,9 @@ class _AllergiesTabState extends State<AllergiesTab> {
     try {
       if (patientId == null) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Patient ID not found')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('Patient ID not found')));
         }
         return;
       }
@@ -102,9 +104,9 @@ class _AllergiesTabState extends State<AllergiesTab> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to add allergy: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to add allergy: $e')));
       }
     }
   }
@@ -134,9 +136,9 @@ class _AllergiesTabState extends State<AllergiesTab> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error deleting allergy: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error deleting allergy: $e')));
       }
     }
   }
@@ -176,7 +178,9 @@ class _AllergiesTabState extends State<AllergiesTab> {
                 child: Text(
                   'No allergies recorded yet',
                   style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
               ),

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'dart:convert';
-import 'package:http/http.dart' as http;
 import '../../../../providers/user_provider.dart';
 import '../../../../services/api_service.dart';
 import '../../../../services/evv_service.dart';
@@ -529,25 +528,25 @@ class _VisitCompletePageState extends State<VisitCompletePage> {
             width: double.infinity,
             margin: const EdgeInsets.symmetric(horizontal: 20),
 
- 
-child: FilledButton.icon(
-  onPressed: _isSubmitting ? null : _completeVisit,
-  style: FilledButton.styleFrom(
-    padding: const EdgeInsets.symmetric(vertical: 10),
-    shape: shape,
-    backgroundColor: cs.primary,
-    foregroundColor: cs.onPrimary,
-  ),
-  icon: _isSubmitting
-      ? const SizedBox(
-          width: 18,
-          height: 18,
-          child: CircularProgressIndicator(strokeWidth: 2),
-        )
-      : const Icon(Icons.check, size: 18),
-  label: Text(_isSubmitting ? 'Completing Visit...' : 'Complete Visit'),
-),
-
+            child: FilledButton.icon(
+              onPressed: _isSubmitting ? null : _completeVisit,
+              style: FilledButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                shape: shape,
+                backgroundColor: cs.primary,
+                foregroundColor: cs.onPrimary,
+              ),
+              icon: _isSubmitting
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.check, size: 18),
+              label: Text(
+                _isSubmitting ? 'Completing Visit...' : 'Complete Visit',
+              ),
+            ),
           ),
 
           const SizedBox(height: 24),

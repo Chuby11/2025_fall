@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'invoice_models.dart';
 
 class FilterResult {
@@ -22,12 +23,14 @@ class FilterResult {
     this.amountRange,
   });
 }
+
 class DesktopTable extends StatelessWidget {
   final List<Invoice> invoices;
   final void Function(Invoice) onView;
   final void Function(Invoice) onPay;
 
   const DesktopTable({
+    super.key,
     required this.invoices,
     required this.onView,
     required this.onPay,
@@ -45,31 +48,35 @@ class DesktopTable extends StatelessWidget {
         DataColumn(label: Text('Actions')),
       ],
       rows: invoices.map((i) {
-        return DataRow(cells: [
-          DataCell(Text(i.invoiceNumber)),
-          DataCell(Text(i.provider.name)),
-          DataCell(Text(i.patient.name)),
-          DataCell(Text('\$${i.amounts.amountDue?.toStringAsFixed(2) ?? "-"}')),
-          DataCell(Text(i.paymentStatus.name)),
-          DataCell(Row(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.visibility),
-                onPressed: () => onView(i),
+        return DataRow(
+          cells: [
+            DataCell(Text(i.invoiceNumber)),
+            DataCell(Text(i.provider.name)),
+            DataCell(Text(i.patient.name)),
+            DataCell(
+              Text('\$${i.amounts.amountDue?.toStringAsFixed(2) ?? "-"}'),
+            ),
+            DataCell(Text(i.paymentStatus.name)),
+            DataCell(
+              Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.visibility),
+                    onPressed: () => onView(i),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.payment),
+                    onPressed: () => onPay(i),
+                  ),
+                ],
               ),
-              IconButton(
-                icon: const Icon(Icons.payment),
-                onPressed: () => onPay(i),
-              ),
-            ],
-          )),
-        ]);
+            ),
+          ],
+        );
       }).toList(),
     );
   }
 }
-
-
 
 class MobileCard extends StatelessWidget {
   const MobileCard({
@@ -92,7 +99,8 @@ class MobileCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final isOverdue = invoice.paymentStatus != PaymentStatus.paid &&
+    final isOverdue =
+        invoice.paymentStatus != PaymentStatus.paid &&
         invoice.dates.dueDate.isBefore(DateTime.now());
     final isRejected = invoice.paymentStatus == PaymentStatus.rejectedInsurance;
 
@@ -126,12 +134,19 @@ class MobileCard extends StatelessWidget {
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                       if (isOverdue)
-                        _pill(context, 'Overdue',
-                            bg: Colors.red.shade100,
-                            fg: Colors.red.shade800),
+                        _pill(
+                          context,
+                          'Overdue',
+                          bg: Colors.red.shade100,
+                          fg: Colors.red.shade800,
+                        ),
                       if (isRejected)
-                        _pill(context, 'Rejected',
-                            bg: cs.errorContainer, fg: cs.onErrorContainer),
+                        _pill(
+                          context,
+                          'Rejected',
+                          bg: cs.errorContainer,
+                          fg: cs.onErrorContainer,
+                        ),
                       // Secondary line under number
                       SizedBox(
                         width: double.infinity,
@@ -139,9 +154,7 @@ class MobileCard extends StatelessWidget {
                           padding: const EdgeInsets.only(top: 4),
                           child: Text(
                             invoice.provider.name, // adjust if needed
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
+                            style: Theme.of(context).textTheme.bodySmall
                                 ?.copyWith(color: cs.onSurfaceVariant),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -157,10 +170,9 @@ class MobileCard extends StatelessWidget {
                   children: [
                     Text(
                       _money(amount),
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleMedium
-                          ?.copyWith(fontWeight: FontWeight.w700),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     _statusChip(context, invoice.paymentStatus),
@@ -186,9 +198,11 @@ class MobileCard extends StatelessWidget {
                   strong: isOverdue,
                 ),
                 _kv('Statement Date', _date(invoice.dates.statementDate)),
-                _kv('Services',
-                    '${invoice.services.length} ${invoice.services.length == 1 ? 'item' : 'items'}'),
-                _kv('Provider Phone', invoice.provider.phone ?? '—'), 
+                _kv(
+                  'Services',
+                  '${invoice.services.length} ${invoice.services.length == 1 ? 'item' : 'items'}',
+                ),
+                _kv('Provider Phone', invoice.provider.phone ?? '—'),
               ],
             ),
 
@@ -247,18 +261,24 @@ class MobileCard extends StatelessWidget {
     return '${d.month}/${d.day}/${d.year}';
   }
 
-  static Widget _pill(BuildContext context, String text,
-      {required Color bg, required Color fg}) {
+  static Widget _pill(
+    BuildContext context,
+    String text, {
+    required Color bg,
+    required Color fg,
+  }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration:
-          BoxDecoration(color: bg, borderRadius: BorderRadius.circular(999)),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(999),
+      ),
       child: Text(
         text,
-        style: Theme.of(context)
-            .textTheme
-            .labelSmall
-            ?.copyWith(color: fg, fontWeight: FontWeight.w700),
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+          color: fg,
+          fontWeight: FontWeight.w700,
+        ),
       ),
     );
   }
@@ -288,7 +308,7 @@ class MobileCard extends StatelessWidget {
         break;
       case PaymentStatus.sent:
       case PaymentStatus.partialPayment:
-        bg = cs.surfaceVariant;
+        bg = cs.surfaceContainerHighest;
         fg = cs.onSurfaceVariant;
         break;
     }
@@ -353,8 +373,13 @@ class _DetailsGrid extends StatelessWidget {
 }
 
 class _DetailRow extends StatelessWidget {
-  const _DetailRow(this.label, this.value,
-      {this.color, this.strong = false, this.icon});
+  const _DetailRow(
+    this.label,
+    this.value, {
+    this.color,
+    this.strong = false,
+    this.icon,
+  });
 
   final String label;
   final String value;
@@ -375,25 +400,25 @@ class _DetailRow extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label,
-                  style: Theme.of(context)
-                      .textTheme
-                      .labelSmall
-                      ?.copyWith(color: cs.onSurfaceVariant)),
+              Text(
+                label,
+                style: Theme.of(
+                  context,
+                ).textTheme.labelSmall?.copyWith(color: cs.onSurfaceVariant),
+              ),
               const SizedBox(height: 2),
               Text(
                 value,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: strong
-                    ? Theme.of(context)
-                        .textTheme
-                        .bodyMedium
-                        ?.copyWith(fontWeight: FontWeight.w700, color: color)
-                    : Theme.of(context)
-                        .textTheme
-                        .bodyMedium
-                        ?.copyWith(color: color),
+                    ? Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: color,
+                      )
+                    : Theme.of(
+                        context,
+                      ).textTheme.bodyMedium?.copyWith(color: color),
               ),
             ],
           ),
@@ -403,7 +428,12 @@ class _DetailRow extends StatelessWidget {
   }
 }
 
-_DetailRow _kv(String label, String value,
-    {Color? color, bool strong = false, IconData? icon}) {
+_DetailRow _kv(
+  String label,
+  String value, {
+  Color? color,
+  bool strong = false,
+  IconData? icon,
+}) {
   return _DetailRow(label, value, color: color, strong: strong, icon: icon);
 }

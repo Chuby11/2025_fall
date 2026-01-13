@@ -2,20 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:permission_handler/permission_handler.dart';
 import '../../../../providers/user_provider.dart';
 import '../../../../services/api_service.dart';
-import '../../../../services/auth_token_manager.dart';
 import '../../../../config/theme/app_theme.dart';
 import '../../../dashboard/models/patient_model.dart';
 import 'dart:convert';
-import 'package:http/http.dart' as http;
 
 class CheckinLocationPage extends StatefulWidget {
   final int patientId;
   final String serviceType;
   final int? scheduledVisitId;
-  
+
   const CheckinLocationPage({
     super.key,
     required this.patientId,
@@ -49,7 +46,7 @@ class _CheckinLocationPageState extends State<CheckinLocationPage> {
 
       final userProvider = Provider.of<UserProvider>(context, listen: false);
       final user = userProvider.user;
-      
+
       if (user == null) {
         throw Exception('User not authenticated');
       }
@@ -60,7 +57,7 @@ class _CheckinLocationPageState extends State<CheckinLocationPage> {
 
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
-        
+
         // Find the specific patient
         for (var json in data) {
           try {
@@ -88,10 +85,12 @@ class _CheckinLocationPageState extends State<CheckinLocationPage> {
             print('Error parsing patient: $e');
           }
         }
-        
+
         throw Exception('Patient not found');
       } else {
-        throw Exception('Failed to load patient details: ${response.statusCode}');
+        throw Exception(
+          'Failed to load patient details: ${response.statusCode}',
+        );
       }
     } catch (e) {
       setState(() {
@@ -110,7 +109,9 @@ class _CheckinLocationPageState extends State<CheckinLocationPage> {
       // Check if location services are enabled
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
-        _showLocationError('Location services are disabled. Please enable location services in your device settings.');
+        _showLocationError(
+          'Location services are disabled. Please enable location services in your device settings.',
+        );
         return;
       }
 
@@ -119,13 +120,17 @@ class _CheckinLocationPageState extends State<CheckinLocationPage> {
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
-          _showLocationError('Location permissions are denied. Please enable location permissions to use GPS location.');
+          _showLocationError(
+            'Location permissions are denied. Please enable location permissions to use GPS location.',
+          );
           return;
         }
       }
 
       if (permission == LocationPermission.deniedForever) {
-        _showLocationError('Location permissions are permanently denied. Please enable location permissions in your device settings.');
+        _showLocationError(
+          'Location permissions are permanently denied. Please enable location permissions in your device settings.',
+        );
         return;
       }
 
@@ -146,7 +151,6 @@ class _CheckinLocationPageState extends State<CheckinLocationPage> {
         latitude: position.latitude,
         longitude: position.longitude,
       );
-
     } catch (e) {
       setState(() {
         _isGettingLocation = false;
@@ -156,9 +160,7 @@ class _CheckinLocationPageState extends State<CheckinLocationPage> {
   }
 
   void _usePatientAddress() {
-    _navigateToVisitProgress(
-      locationType: 'patient_address',
-    );
+    _navigateToVisitProgress(locationType: 'patient_address');
   }
 
   void _navigateToVisitProgress({
@@ -176,7 +178,7 @@ class _CheckinLocationPageState extends State<CheckinLocationPage> {
       queryParams['latitude'] = latitude.toString();
       queryParams['longitude'] = longitude.toString();
     }
-    
+
     if (widget.scheduledVisitId != null) {
       queryParams['scheduledVisitId'] = widget.scheduledVisitId.toString();
     }
@@ -245,15 +247,15 @@ class _CheckinLocationPageState extends State<CheckinLocationPage> {
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
-    
+
     if (_error != null) {
       return _buildErrorState();
     }
-    
+
     if (_selectedPatient == null) {
       return _buildPatientNotFoundState();
     }
-    
+
     return _buildLocationSelection();
   }
 
@@ -346,26 +348,16 @@ class _CheckinLocationPageState extends State<CheckinLocationPage> {
             decoration: BoxDecoration(
               color: Colors.blue[50],
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: Colors.blue[200]!,
-                width: 1,
-              ),
+              border: Border.all(color: Colors.blue[200]!, width: 1),
             ),
             child: Row(
               children: [
-                Icon(
-                  Icons.location_on,
-                  color: Colors.blue[600],
-                  size: 20,
-                ),
+                Icon(Icons.location_on, color: Colors.blue[600], size: 20),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     'Select your location to check in for the visit. Choose patient address for routine visits or GPS for precise location.',
-                    style: TextStyle(
-                      color: Colors.blue[800],
-                      fontSize: 14,
-                    ),
+                    style: TextStyle(color: Colors.blue[800], fontSize: 14),
                   ),
                 ),
               ],
@@ -410,17 +402,11 @@ class _CheckinLocationPageState extends State<CheckinLocationPage> {
             decoration: BoxDecoration(
               color: Colors.blue[50],
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: Colors.blue[200]!,
-                width: 1,
-              ),
+              border: Border.all(color: Colors.blue[200]!, width: 1),
             ),
             child: Text(
               'EVV Compliance: Both options satisfy Electronic Visit Verification requirements. Patient address is sufficient for most visits, while GPS provides exact coordinates when needed.',
-              style: TextStyle(
-                color: Colors.blue[800],
-                fontSize: 14,
-              ),
+              style: TextStyle(color: Colors.blue[800], fontSize: 14),
             ),
           ),
         ],
@@ -463,11 +449,7 @@ class _CheckinLocationPageState extends State<CheckinLocationPage> {
           // Title section
           Row(
             children: [
-              Icon(
-                icon,
-                color: iconColor,
-                size: 24,
-              ),
+              Icon(icon, color: iconColor, size: 24),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
@@ -496,18 +478,12 @@ class _CheckinLocationPageState extends State<CheckinLocationPage> {
             const SizedBox(height: 4),
             Text(
               address,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
             ),
             const SizedBox(height: 8),
             Text(
               recommendation!,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[500],
-              ),
+              style: TextStyle(fontSize: 12, color: Colors.grey[500]),
             ),
           ],
 
@@ -515,19 +491,13 @@ class _CheckinLocationPageState extends State<CheckinLocationPage> {
           if (description != null) ...[
             Text(
               description,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
             ),
             if (additionalInfo != null) ...[
               const SizedBox(height: 4),
               Text(
                 additionalInfo,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[500],
-                ),
+                style: TextStyle(fontSize: 12, color: Colors.grey[500]),
               ),
             ],
           ],

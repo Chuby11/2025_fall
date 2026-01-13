@@ -1,14 +1,14 @@
 import 'dart:convert';
 
+import 'package:care_connect_app/features/notetaker/models/patient_note_model.dart';
+import 'package:care_connect_app/providers/user_provider.dart';
+import 'package:care_connect_app/services/api_service.dart';
+import 'package:care_connect_app/services/notetaker_config_service.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:care_connect_app/features/notetaker/models/patient_note_model.dart';
-import 'package:care_connect_app/services/notetaker_config_service.dart';
-import 'package:care_connect_app/services/api_service.dart';
-import 'package:care_connect_app/providers/user_provider.dart';
 
 class NotetakerDetailView extends StatefulWidget {
   const NotetakerDetailView({super.key});
@@ -241,7 +241,13 @@ class _NotetakerDetailViewState extends State<NotetakerDetailView> {
           ),
           actions: [
             if (_isEditing)
-              IconButton(icon: const Icon(Icons.save), onPressed: () async { await _saveNote(); context.pop(true); })
+              IconButton(
+                icon: const Icon(Icons.save),
+                onPressed: () async {
+                  await _saveNote();
+                  context.pop(true);
+                },
+              )
             else
               IconButton(
                 icon: const Icon(Icons.edit),
@@ -315,7 +321,7 @@ class _NotetakerDetailViewState extends State<NotetakerDetailView> {
                           : Container(
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: theme.colorScheme.surfaceVariant
+                                color: theme.colorScheme.surfaceContainerHighest
                                     .withOpacity(0.5),
                                 borderRadius: BorderRadius.circular(8),
                               ),

@@ -3,14 +3,13 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:care_connect_app/services/api_service.dart';
+import 'package:care_connect_app/services/auth_token_manager.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:path/path.dart' as p;
 import 'package:mime/mime.dart';
-
-import 'package:care_connect_app/services/auth_token_manager.dart';
-import 'package:care_connect_app/services/api_service.dart';
+import 'package:path/path.dart' as p;
 
 import '../models/invoice_models.dart';
 
@@ -160,7 +159,9 @@ bool _looksLikeHeic(Uint8List bytes, String? ext, String? mime) {
         sig.startsWith('ftypheix') ||
         sig.startsWith('ftyphevc') ||
         sig.startsWith('ftypmif1') ||
-        sig.startsWith('ftypmsf1')) return true;
+        sig.startsWith('ftypmsf1')) {
+      return true;
+    }
   }
   return false;
 }
@@ -177,7 +178,7 @@ Future<Uint8List> _heicBytesToPng(Uint8List heic) async {
 
 // Maps server InvoiceDto -> client Invoice model
 Invoice _mapInvoiceDtoToClient(Map<String, dynamic> j) {
-  T? _m<T>(String k) => j[k] as T?;
+  T? m<T>(String k) => j[k] as T?;
 
   final providerMap = j['provider'] as Map<String, dynamic>?;
   final patientMap = j['patient'] as Map<String, dynamic>?;
@@ -274,25 +275,25 @@ Invoice _mapInvoiceDtoToClient(Map<String, dynamic> j) {
   final recActions = _stringList(j['recommendedActions']);
 
   return Invoice(
-    id: _m<String>('id') ?? '',
-    invoiceNumber: _m<String>('invoiceNumber') ?? '',
+    id: m<String>('id') ?? '',
+    invoiceNumber: m<String>('invoiceNumber') ?? '',
     provider: provider,
     patient: patient,
     dates: dates,
     services: services,
-    paymentStatus: _paymentStatusFromWire(_m<String>('paymentStatus')),
+    paymentStatus: _paymentStatusFromWire(m<String>('paymentStatus')),
     billedToInsurance: j['billedToInsurance'] as bool? ?? false,
     amounts: amounts,
     paymentReferences: refs,
     checkPayableTo: check,
-    createdAt: _m<String>('createdAt') ?? nowIso,
-    updatedAt: _m<String>('updatedAt') ?? nowIso,
-    createdBy: _m<String>('createdBy') ?? 'system',
-    updatedBy: _m<String>('updatedBy') ?? 'system',
-    documentLink: _m<String>('documentLink'),
+    createdAt: m<String>('createdAt') ?? nowIso,
+    updatedAt: m<String>('updatedAt') ?? nowIso,
+    createdBy: m<String>('createdBy') ?? 'system',
+    updatedBy: m<String>('updatedBy') ?? 'system',
+    documentLink: m<String>('documentLink'),
     history: history,
     payments: payments,
-    aiSummary: _m<String>('aiSummary'),
+    aiSummary: m<String>('aiSummary'),
     recommendedActions: recActions,
   );
 }

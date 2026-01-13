@@ -1,19 +1,15 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 // import 'package:agora_rtc_engine/agora_rtc_engine.dart';
-import 'package:permission_handler/permission_handler.dart';
-import '../config/theme/app_theme.dart';
-import 'package:camera/camera.dart';
 
-class VideoWidget extends StatefulWidget{
+class VideoWidget extends StatefulWidget {
   ///TODO: Figure out what a key is in this context and add it.
   const VideoWidget({super.key});
   @override
   State<VideoWidget> createState() => VideoWidgetState();
 }
 
-class VideoWidgetState extends State<VideoWidget>
-{
+class VideoWidgetState extends State<VideoWidget> {
   CameraController? controller;
   Future<void>? controllerFuture;
 
@@ -32,10 +28,7 @@ class VideoWidgetState extends State<VideoWidget>
       }
 
       // Initialize the camera controller
-      controller = CameraController(
-        cameras.first,
-        ResolutionPreset.medium,
-      );
+      controller = CameraController(cameras.first, ResolutionPreset.medium);
 
       controllerFuture = controller!.initialize();
       setState(() {});
@@ -53,9 +46,7 @@ class VideoWidgetState extends State<VideoWidget>
   @override
   Widget build(BuildContext context) {
     if (controller == null || controllerFuture == null) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
     return FutureBuilder<void>(
@@ -75,12 +66,9 @@ class VideoWidgetState extends State<VideoWidget>
             child: CameraPreview(controller!),
           );
         } else {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
+          return const Center(child: CircularProgressIndicator());
         }
       },
     );
   }
-
 }

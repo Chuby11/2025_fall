@@ -1,7 +1,8 @@
 // sections/details_section.dart
 import 'package:flutter/material.dart';
-import '../components/date_field.dart';
+
 import '../../models/invoice_models.dart';
+import '../components/date_field.dart';
 
 class DetailsSection extends StatelessWidget {
   const DetailsSection({
@@ -121,7 +122,7 @@ class DetailsSection extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<PaymentStatus>(
-          value: value.paymentStatus,
+          initialValue: value.paymentStatus,
           decoration: const InputDecoration(
             labelText: 'Payment Status',
             isDense: true,

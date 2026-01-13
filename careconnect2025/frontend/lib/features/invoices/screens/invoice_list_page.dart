@@ -1,12 +1,12 @@
 // invoice_list_page.dart
 import 'package:care_connect_app/features/invoices/models/filter_result.dart';
+import 'package:care_connect_app/features/invoices/models/invoice_models.dart';
+import 'package:care_connect_app/features/invoices/services/excel/excel_service.dart';
 import 'package:care_connect_app/features/invoices/services/invoice_service.dart';
 import 'package:care_connect_app/features/invoices/widgets/search_filter_sheet.dart';
 import 'package:flutter/material.dart';
-import 'package:care_connect_app/features/invoices/models/invoice_models.dart';
-import 'invoice_detail_page.dart';
 
-import 'package:care_connect_app/features/invoices/services/excel/excel_service.dart';
+import 'invoice_detail_page.dart';
 
 class InvoiceListPage extends StatefulWidget {
   const InvoiceListPage({super.key, this.quickFilter});
@@ -290,7 +290,7 @@ class _FilterBar extends StatelessWidget {
             final stacked = c.maxWidth < 520;
 
             final sortField = DropdownButtonFormField<String>(
-              value: sort,
+              initialValue: sort,
               isExpanded: true,
               decoration: const InputDecoration(labelText: 'Sort By'),
               items: const [

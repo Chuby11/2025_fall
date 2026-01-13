@@ -425,7 +425,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
                               errorBuilder: (context, error, stackTrace) {
                                 return Container(
                                   color: Colors.grey.shade800,
-                                  child: Center(
+                                  child: const Center(
                                     child: Icon(
                                       Icons.broken_image,
                                       size: 64,
@@ -461,7 +461,7 @@ class _AlertsScreenState extends State<AlertsScreen> {
                             ),
                             child: Text(
                               '${_skeletonFrames.length} frames • ${(_skeletonFrames.length / 25).toStringAsFixed(1)}s',
-                              style: TextStyle(
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,

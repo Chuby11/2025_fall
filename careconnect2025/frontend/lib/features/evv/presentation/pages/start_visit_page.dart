@@ -384,7 +384,7 @@ class _StartVisitPageState extends State<StartVisitPage> {
                 ),
                 const SizedBox(height: 8),
                 DropdownButtonFormField<String>(
-                  value: _selectedServiceType,
+                  initialValue: _selectedServiceType,
                   decoration: InputDecoration(
                     hintText: 'Select service type',
                     border: OutlineInputBorder(

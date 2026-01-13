@@ -63,7 +63,7 @@ class PainLevelCard extends StatelessWidget {
                 value: value,
                 minHeight: 8, // smaller to match symptom card
                 color: cs.primary,
-                backgroundColor: cs.surfaceVariant.withOpacity(.6),
+                backgroundColor: cs.surfaceContainerHighest.withOpacity(.6),
               ),
             ),
             const SizedBox(height: 4),

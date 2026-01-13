@@ -1,15 +1,12 @@
-import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:flutter/material.dart';
-
-import 'package:care_connect_app/features/health/virtual_check_in/models/virtual_check_in_question.dart';
 import 'package:care_connect_app/features/health/virtual_check_in/models/virtual_check_in_backend_question_model.dart'
     show BackendQuestionDto, BackendQuestionType;
-import 'package:care_connect_app/features/health/virtual_check_in/models/question_type.dart';
 import 'package:care_connect_app/features/health/virtual_check_in/models/virtual_check_in_mapper.dart'
-as vmap;
-
+    as vmap;
+import 'package:care_connect_app/features/health/virtual_check_in/models/virtual_check_in_question.dart';
 import 'package:care_connect_app/features/health/virtual_check_in/services/checkin_api.dart';
 import 'package:care_connect_app/features/health/virtual_check_in/services/questions_api.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/material.dart';
 
 /// Bottom sheet that edits the patient's Virtual Check-In questions.
 class VirtualCheckInConfigSheet extends StatefulWidget {
@@ -78,7 +75,8 @@ class _VirtualCheckInConfigSheetState extends State<VirtualCheckInConfigSheet> {
   // ---------- Dedupe helpers (by prompt) ----------
 
   List<VirtualCheckInQuestion> _dedupeByPrompt(
-      List<VirtualCheckInQuestion> xs) {
+    List<VirtualCheckInQuestion> xs,
+  ) {
     final seen = <String, VirtualCheckInQuestion>{};
     for (final q in xs) {
       final key = q.text.trim().toLowerCase();
@@ -107,8 +105,9 @@ class _VirtualCheckInConfigSheetState extends State<VirtualCheckInConfigSheet> {
     try {
       final backend = await _api.getQuestions(widget.checkInId.toString());
       // DTO → UI via mapper, dedupe by prompt, update state
-      final mapped =
-      backend.map<VirtualCheckInQuestion>(vmap.toUiQuestion).toList();
+      final mapped = backend
+          .map<VirtualCheckInQuestion>(vmap.toUiQuestion)
+          .toList();
       setState(() {
         _items = _dedupeByPrompt(mapped);
         _rebuildPromptIndex();
@@ -122,7 +121,9 @@ class _VirtualCheckInConfigSheetState extends State<VirtualCheckInConfigSheet> {
 
   Future<void> _loadCatalog() async {
     try {
-      final all = await _qApi.listQuestions(active: true); // /api/questions?active=true
+      final all = await _qApi.listQuestions(
+        active: true,
+      ); // /api/questions?active=true
       final existing = _promptsLower;
       setState(() {
         _catalog = all
@@ -153,7 +154,8 @@ class _VirtualCheckInConfigSheetState extends State<VirtualCheckInConfigSheet> {
     setState(() {
       _items.add(
         VirtualCheckInQuestion(
-          id: DateTime.now().microsecondsSinceEpoch.toString(), // temp client id
+          id: DateTime.now().microsecondsSinceEpoch
+              .toString(), // temp client id
           type: _newType,
           required: _newRequired,
           text: prompt,
@@ -166,8 +168,9 @@ class _VirtualCheckInConfigSheetState extends State<VirtualCheckInConfigSheet> {
 
   void _addSelectedFromCatalog() {
     setState(() {
-      for (final dto
-      in _catalog.where((q) => _selectedToAdd.contains(q.id.toString()))) {
+      for (final dto in _catalog.where(
+        (q) => _selectedToAdd.contains(q.id.toString()),
+      )) {
         final key = dto.prompt.trim().toLowerCase();
         if (!_promptsLower.contains(key)) {
           _items.add(vmap.toUiQuestion(dto));
@@ -175,8 +178,9 @@ class _VirtualCheckInConfigSheetState extends State<VirtualCheckInConfigSheet> {
         }
       }
       // Remove added prompts from the catalog and clear selection
-      _catalog
-          .removeWhere((q) => _promptsLower.contains(q.prompt.trim().toLowerCase()));
+      _catalog.removeWhere(
+        (q) => _promptsLower.contains(q.prompt.trim().toLowerCase()),
+      );
       _selectedToAdd.clear();
     });
   }
@@ -196,8 +200,9 @@ class _VirtualCheckInConfigSheetState extends State<VirtualCheckInConfigSheet> {
     return SafeArea(
       top: false,
       child: Padding(
-        padding:
-        EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
         child: Container(
           decoration: BoxDecoration(
             color: cs.surface,
@@ -216,8 +221,9 @@ class _VirtualCheckInConfigSheetState extends State<VirtualCheckInConfigSheet> {
                     Expanded(
                       child: Text(
                         'Configure Virtual Check-In Questions',
-                        style: theme.textTheme.titleMedium
-                            ?.copyWith(fontWeight: FontWeight.w700),
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
                     IconButton(
@@ -240,7 +246,9 @@ class _VirtualCheckInConfigSheetState extends State<VirtualCheckInConfigSheet> {
                   padding: const EdgeInsets.all(16),
                   child: Text(
                     'Error: $_error',
-                    style: theme.textTheme.bodyMedium?.copyWith(color: cs.error),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: cs.error,
+                    ),
                   ),
                 )
               else
@@ -253,8 +261,9 @@ class _VirtualCheckInConfigSheetState extends State<VirtualCheckInConfigSheet> {
                         // Current Questions
                         Text(
                           'Current Questions',
-                          style: theme.textTheme.titleSmall
-                              ?.copyWith(fontWeight: FontWeight.w700),
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                         const SizedBox(height: 8),
 
@@ -264,8 +273,7 @@ class _VirtualCheckInConfigSheetState extends State<VirtualCheckInConfigSheet> {
 
                           return Container(
                             margin: const EdgeInsets.only(bottom: 12),
-                            padding:
-                            const EdgeInsets.fromLTRB(12, 10, 12, 12),
+                            padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
                             decoration: BoxDecoration(
                               color: cs.surface,
                               borderRadius: BorderRadius.circular(12),
@@ -296,8 +304,7 @@ class _VirtualCheckInConfigSheetState extends State<VirtualCheckInConfigSheet> {
                                     _pillOutlined(
                                       context,
                                       label: '#${i + 1}',
-                                      borderColor: cs
-                                          .surfaceContainerHighest
+                                      borderColor: cs.surfaceContainerHighest
                                           .withOpacity(.25),
                                       textColor: cs.onSurfaceVariant,
                                     ),
@@ -305,8 +312,10 @@ class _VirtualCheckInConfigSheetState extends State<VirtualCheckInConfigSheet> {
                                     IconButton(
                                       tooltip: 'Delete question',
                                       onPressed: () => _removeAt(i),
-                                      icon: Icon(Icons.delete_outline,
-                                          color: cs.error),
+                                      icon: Icon(
+                                        Icons.delete_outline,
+                                        color: cs.error,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -314,13 +323,13 @@ class _VirtualCheckInConfigSheetState extends State<VirtualCheckInConfigSheet> {
                                 Text(
                                   q.text,
                                   style: theme.textTheme.bodyLarge?.copyWith(
-                                      fontWeight: FontWeight.w600),
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
                                   _typeHelperText(q.type),
-                                  style:
-                                  theme.textTheme.labelSmall?.copyWith(
+                                  style: theme.textTheme.labelSmall?.copyWith(
                                     color: cs.onSurface.withOpacity(0.70),
                                   ),
                                 ),
@@ -334,8 +343,9 @@ class _VirtualCheckInConfigSheetState extends State<VirtualCheckInConfigSheet> {
                         // ---------- Add from Catalog (selectable) ----------
                         Text(
                           'Add from Catalog',
-                          style: theme.textTheme.titleSmall
-                              ?.copyWith(fontWeight: FontWeight.w700),
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                         const SizedBox(height: 8),
 
@@ -350,7 +360,9 @@ class _VirtualCheckInConfigSheetState extends State<VirtualCheckInConfigSheet> {
                             ),
                             isDense: true,
                             contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 10),
+                              horizontal: 12,
+                              vertical: 10,
+                            ),
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -371,8 +383,7 @@ class _VirtualCheckInConfigSheetState extends State<VirtualCheckInConfigSheet> {
                                   return const SizedBox.shrink();
                                 }
                                 final idStr = q.id.toString();
-                                final checked =
-                                _selectedToAdd.contains(idStr);
+                                final checked = _selectedToAdd.contains(idStr);
                                 return CheckboxListTile(
                                   value: checked,
                                   onChanged: (v) {
@@ -386,7 +397,7 @@ class _VirtualCheckInConfigSheetState extends State<VirtualCheckInConfigSheet> {
                                   },
                                   dense: true,
                                   controlAffinity:
-                                  ListTileControlAffinity.leading,
+                                      ListTileControlAffinity.leading,
                                   title: Text(q.prompt),
                                   subtitle: Text(q.type.name),
                                 );
@@ -412,8 +423,9 @@ class _VirtualCheckInConfigSheetState extends State<VirtualCheckInConfigSheet> {
                         // ---------- Add New Question (manual) ----------
                         Text(
                           'Add New Question',
-                          style: theme.textTheme.titleSmall
-                              ?.copyWith(fontWeight: FontWeight.w700),
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                         const SizedBox(height: 12),
 
@@ -423,8 +435,7 @@ class _VirtualCheckInConfigSheetState extends State<VirtualCheckInConfigSheet> {
                               child: Text(
                                 'Question Type',
                                 style: theme.textTheme.labelLarge?.copyWith(
-                                  color:
-                                  cs.onSurface.withOpacity(.8),
+                                  color: cs.onSurface.withOpacity(.8),
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -434,8 +445,7 @@ class _VirtualCheckInConfigSheetState extends State<VirtualCheckInConfigSheet> {
                               child: Text(
                                 'Options',
                                 style: theme.textTheme.labelLarge?.copyWith(
-                                  color:
-                                  cs.onSurface.withOpacity(.8),
+                                  color: cs.onSurface.withOpacity(.8),
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -450,21 +460,19 @@ class _VirtualCheckInConfigSheetState extends State<VirtualCheckInConfigSheet> {
                             Expanded(
                               child: DropdownMenu<CheckInQuestionType>(
                                 initialSelection: _newType,
-                                onSelected: (v) => setState(() =>
-                                _newType = v ??
-                                    CheckInQuestionType.numerical),
+                                onSelected: (v) => setState(
+                                  () => _newType =
+                                      v ?? CheckInQuestionType.numerical,
+                                ),
                                 requestFocusOnTap: true,
                                 enableFilter: false,
                                 expandedInsets: EdgeInsets.zero,
                                 textStyle: theme.textTheme.bodyLarge,
-                                leadingIcon:
-                                _typeLeadingIcon(_newType, cs),
+                                leadingIcon: _typeLeadingIcon(_newType, cs),
                                 menuStyle: MenuStyle(
-                                  shape:
-                                  WidgetStatePropertyAll<OutlinedBorder>(
+                                  shape: WidgetStatePropertyAll<OutlinedBorder>(
                                     RoundedRectangleBorder(
-                                      borderRadius:
-                                      BorderRadius.circular(12),
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
                                   ),
                                 ),
@@ -479,31 +487,31 @@ class _VirtualCheckInConfigSheetState extends State<VirtualCheckInConfigSheet> {
                                   ),
                                   focusedBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
-                                    borderSide:
-                                    BorderSide(color: cs.primary),
+                                    borderSide: BorderSide(color: cs.primary),
                                   ),
-                                  contentPadding:
-                                  const EdgeInsets.symmetric(
-                                      horizontal: 12, vertical: 16),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 16,
+                                  ),
                                 ),
                                 dropdownMenuEntries: const [
                                   DropdownMenuEntry(
                                     value: CheckInQuestionType.numerical,
                                     label: 'Numerical (1–10 scale)',
-                                    leadingIcon:
-                                    Icon(Icons.onetwothree, size: 18),
+                                    leadingIcon: Icon(
+                                      Icons.onetwothree,
+                                      size: 18,
+                                    ),
                                   ),
                                   DropdownMenuEntry(
                                     value: CheckInQuestionType.textInput,
                                     label: 'Text Input',
-                                    leadingIcon:
-                                    Icon(Icons.edit, size: 18),
+                                    leadingIcon: Icon(Icons.edit, size: 18),
                                   ),
                                   DropdownMenuEntry(
                                     value: CheckInQuestionType.yesNo,
                                     label: 'Yes/No',
-                                    leadingIcon:
-                                    Icon(Icons.task_alt, size: 18),
+                                    leadingIcon: Icon(Icons.task_alt, size: 18),
                                   ),
                                 ],
                               ),
@@ -512,16 +520,17 @@ class _VirtualCheckInConfigSheetState extends State<VirtualCheckInConfigSheet> {
                             Expanded(
                               child: CheckboxListTile(
                                 value: _newRequired,
-                                onChanged: (v) => setState(
-                                        () => _newRequired = v ?? false),
+                                onChanged: (v) =>
+                                    setState(() => _newRequired = v ?? false),
                                 dense: true,
                                 contentPadding: EdgeInsets.zero,
                                 controlAffinity:
-                                ListTileControlAffinity.leading,
+                                    ListTileControlAffinity.leading,
                                 title: const Text('Required question'),
                                 side: const BorderSide(color: Colors.grey),
-                                fillColor:
-                                WidgetStateProperty.all(Colors.white),
+                                fillColor: WidgetStateProperty.all(
+                                  Colors.white,
+                                ),
                                 checkColor: Colors.black,
                               ),
                             ),
@@ -544,8 +553,7 @@ class _VirtualCheckInConfigSheetState extends State<VirtualCheckInConfigSheet> {
                           textInputAction: TextInputAction.done,
                           maxLines: null,
                           decoration: InputDecoration(
-                            hintText:
-                            'Enter your check-in question...',
+                            hintText: 'Enter your check-in question...',
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                               borderSide: BorderSide(color: border),
@@ -558,8 +566,7 @@ class _VirtualCheckInConfigSheetState extends State<VirtualCheckInConfigSheet> {
                               borderRadius: BorderRadius.circular(12),
                               borderSide: BorderSide(color: cs.primary),
                             ),
-                            contentPadding:
-                            const EdgeInsets.symmetric(
+                            contentPadding: const EdgeInsets.symmetric(
                               horizontal: 12,
                               vertical: 12,
                             ),
@@ -597,7 +604,8 @@ class _VirtualCheckInConfigSheetState extends State<VirtualCheckInConfigSheet> {
                   children: [
                     OutlinedButton.icon(
                       style: OutlinedButton.styleFrom(
-                          shape: const StadiumBorder()),
+                        shape: const StadiumBorder(),
+                      ),
                       icon: const Icon(Icons.close, size: 18),
                       label: const Text('Cancel'),
                       onPressed: () => Navigator.of(context).pop(),
@@ -621,11 +629,11 @@ class _VirtualCheckInConfigSheetState extends State<VirtualCheckInConfigSheet> {
   // ---------- UI helpers ----------
 
   Widget _pillOutlined(
-      BuildContext context, {
-        required String label,
-        required Color borderColor,
-        required Color textColor,
-      }) {
+    BuildContext context, {
+    required String label,
+    required Color borderColor,
+    required Color textColor,
+  }) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
@@ -638,8 +646,7 @@ class _VirtualCheckInConfigSheetState extends State<VirtualCheckInConfigSheet> {
             : Colors.white,
         borderRadius: BorderRadius.circular(999),
         border: Border.all(
-          color:
-          isDark ? cs.outlineVariant.withOpacity(.45) : borderColor,
+          color: isDark ? cs.outlineVariant.withOpacity(.45) : borderColor,
         ),
       ),
       child: Text(
@@ -654,15 +661,17 @@ class _VirtualCheckInConfigSheetState extends State<VirtualCheckInConfigSheet> {
   }
 
   Widget _pillFilled(
-      BuildContext context, {
-        required String label,
-        required Color bg,
-        required Color fg,
-      }) {
+    BuildContext context, {
+    required String label,
+    required Color bg,
+    required Color fg,
+  }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration:
-      BoxDecoration(color: bg, borderRadius: BorderRadius.circular(999)),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(999),
+      ),
       child: Text(
         label,
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
@@ -678,8 +687,7 @@ class _VirtualCheckInConfigSheetState extends State<VirtualCheckInConfigSheet> {
     switch (t) {
       case CheckInQuestionType.numerical:
         return Container(
-          padding:
-          const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
             color: const Color(0xFF2666F6),
             borderRadius: BorderRadius.circular(8),

@@ -1,8 +1,8 @@
+import 'dart:convert';
+
 import 'package:care_connect_app/features/social/in-app-chat/pages/chat-page.dart';
 import 'package:care_connect_app/widgets/default_app_header.dart';
-import 'package:care_connect_app/services/messaging_service.dart';
 import 'package:flutter/material.dart';
-import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 

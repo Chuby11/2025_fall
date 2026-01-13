@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:http/http.dart' as http;
 
 /// Service that handles creating and retrieving patient check-ins.
@@ -9,7 +10,7 @@ class CheckinService {
   /// Adds a new check-in for a patient.
   /// Example use: CheckinService.addCheckin(patientId, caregiverId);
   static Future<bool> addCheckin(String patientId, String caregiverId) async {
-    final url = Uri.parse('$_baseUrl');
+    final url = Uri.parse(_baseUrl);
     final body = jsonEncode({
       'patientId': patientId,
       'caregiverId': caregiverId,

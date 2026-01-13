@@ -1,11 +1,10 @@
 // lib/providers/shortcut_provider.dart
 import 'dart:collection';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 // Import your generated localizations to resolve labels at render-time.
 import 'package:care_connect_app/l10n/app_localizations.dart';
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ShortcutDef {
   final String key;               // unique id for persistence

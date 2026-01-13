@@ -8,13 +8,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:provider/provider.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:provider/provider.dart';
 
 import 'config/router/app_router.dart';
-import 'services/auth_migration_helper.dart';
-import 'services/messaging_service.dart';
 import 'config/theme/app_theme.dart';
 import 'config/utils/responsive_utils.dart';
 import 'config/utils/web_utils.dart';
@@ -48,13 +45,12 @@ Future<void> main() async {
 
       // Configure URL strategy for web to remove hash from URLs
       if (kIsWeb) {
-    // For hash-based routes:
-         setUrlStrategy(const HashUrlStrategy());
- 
-        }else{
-            // Or, for path-based routes (no #):
-          usePathUrlStrategy();
-        }
+        // For hash-based routes:
+        setUrlStrategy(const HashUrlStrategy());
+      } else {
+        // Or, for path-based routes (no #):
+        usePathUrlStrategy();
+      }
 
       // Create providers (don't initialize them yet)
       final userProvider = UserProvider();

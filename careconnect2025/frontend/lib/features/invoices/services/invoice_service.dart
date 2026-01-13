@@ -1,9 +1,11 @@
 import 'dart:convert';
+
 import 'package:care_connect_app/services/api_service.dart';
 import 'package:care_connect_app/services/auth_token_manager.dart';
-import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher_string.dart'; // for openPdf
+
 import '../models/invoice_models.dart';
 
 /// REST-backed invoice service with filtering, sorting, and CRUD.
@@ -33,8 +35,8 @@ class InvoiceService {
         'patientName': _nz(patientName),
         'dueStart': dueRange == null ? null : _dateOnly(dueRange.start),
         'dueEnd': dueRange == null ? null : _dateOnly(dueRange.end),
-        'amountMin': amountRange == null ? null : amountRange.start.toString(),
-        'amountMax': amountRange == null ? null : amountRange.end.toString(),
+        'amountMin': amountRange?.start.toString(),
+        'amountMax': amountRange?.end.toString(),
         'sort': _nz(sort),
         'page': page?.toString(),
         'pageSize': pageSize?.toString(),

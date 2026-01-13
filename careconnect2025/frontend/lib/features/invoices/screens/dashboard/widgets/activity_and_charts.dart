@@ -2,9 +2,9 @@ import 'package:care_connect_app/features/invoices/models/invoice_models.dart';
 import 'package:care_connect_app/features/invoices/screens/dashboard/utilis/format.dart';
 import 'package:care_connect_app/features/invoices/screens/dashboard/utilis/metrics.dart';
 import 'package:care_connect_app/features/invoices/screens/invoice_detail_page.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:fl_chart/fl_chart.dart';
 
  
 
@@ -378,7 +378,7 @@ class AmountBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceVariant.withOpacity(.8),
+        color: theme.colorScheme.surfaceContainerHighest.withOpacity(.8),
         borderRadius: BorderRadius.circular(999),
         border: Border.all(color: theme.colorScheme.outline.withOpacity(.4)),
       ),

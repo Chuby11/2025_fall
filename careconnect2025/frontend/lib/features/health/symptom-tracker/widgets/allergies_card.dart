@@ -8,13 +8,13 @@ class AllergyCard extends StatelessWidget {
   final VoidCallback onDelete;
 
   const AllergyCard({
-    Key? key,
+    super.key,
     required this.drug,
     required this.reaction,
     required this.severity,
     required this.note,
     required this.onDelete,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

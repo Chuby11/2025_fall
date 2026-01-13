@@ -2,13 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../config/theme/app_theme.dart';
 import '../../../../providers/user_provider.dart';
 import '../../../../services/enhanced_auth_service.dart';
 import '../../../../services/auth_service.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
-
 
 class AlexaLoginPage extends StatefulWidget {
   const AlexaLoginPage({super.key});
@@ -20,11 +17,11 @@ class AlexaLoginPage extends StatefulWidget {
 class _AlexaLoginPageState extends State<AlexaLoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  
+
   bool _busy = false;
   String? _error;
   bool _showPassword = false;
-  
+
   // Alexa OAuth parameters
   String? _redirectUri;
   String? _state;
@@ -53,7 +50,7 @@ class _AlexaLoginPageState extends State<AlexaLoginPage> {
     final timestamp = DateTime.now().toString().split('.')[0];
     final logEntry = "[$timestamp] $message";
     print(logEntry);
-    
+
     setState(() {
       _debugLog = "$logEntry\n$_debugLog";
       if (_debugLog.split('\n').length > 50) {
@@ -61,37 +58,40 @@ class _AlexaLoginPageState extends State<AlexaLoginPage> {
       }
     });
   }
-Map<String, String> _mergedQueryParamsFromUriBase() {
-  final base = Uri.base; 
-  final preHash = base.queryParameters;
 
+  Map<String, String> _mergedQueryParamsFromUriBase() {
+    final base = Uri.base;
+    final preHash = base.queryParameters;
 
-  final frag = base.fragment.trim();
-  Map<String, String> postHash = const {};
+    final frag = base.fragment.trim();
+    Map<String, String> postHash = const {};
 
-  if (frag.isNotEmpty) {
-    final normalized = frag.startsWith('/') ? frag : '/$frag';
-    final fragUri = Uri.tryParse(normalized);
-    if (fragUri != null) {
-      postHash = fragUri.queryParameters;
+    if (frag.isNotEmpty) {
+      final normalized = frag.startsWith('/') ? frag : '/$frag';
+      final fragUri = Uri.tryParse(normalized);
+      if (fragUri != null) {
+        postHash = fragUri.queryParameters;
+      }
     }
+
+    return {...preHash, ...postHash};
   }
 
-  return {...preHash, ...postHash};
-}
   /// Check if this is an Alexa OAuth flow by looking at URL parameters
   void _checkForAlexaOAuthParams() {
     _log("🔍 Checking for Alexa OAuth parameters...");
-    
+
     try {
       // Try to get URL query parameters from GoRouter
-      final routeState = GoRouter.of(context).routerDelegate.currentConfiguration;
+      final routeState = GoRouter.of(
+        context,
+      ).routerDelegate.currentConfiguration;
       final uri = routeState.uri;
       final qp = _mergedQueryParamsFromUriBase();
 
       _log("Current URI: $uri");
       _log("Query Parameters: ${uri.queryParameters}");
-      
+
       _redirectUri = qp['redirect_uri'];
       _state = qp['state'];
 
@@ -101,19 +101,22 @@ Map<String, String> _mergedQueryParamsFromUriBase() {
         if (extra is Map<String, dynamic>) {
           _redirectUri = extra['redirect_uri'] as String?;
           _state = extra['state'] as String?;
-          _log("✓ Got params from route extra - redirect_uri: $_redirectUri, state: $_state");
+          _log(
+            "✓ Got params from route extra - redirect_uri: $_redirectUri, state: $_state",
+          );
         }
       }
-      
+
       // TESTING ONLY: Hardcoded fallback for debugging (remove in production)
       if (_redirectUri == null) {
         _log("⚠️ No Alexa params found - using hardcoded test values");
-        _redirectUri = "https://pitangui.amazon.com/api/skill/link/M1VZ06KRKERWBD";
+        _redirectUri =
+            "https://pitangui.amazon.com/api/skill/link/M1VZ06KRKERWBD";
         _state = "test-state-123";
       }
-      
+
       _isAlexaFlow = _redirectUri != null && _redirectUri!.isNotEmpty;
-      
+
       if (_isAlexaFlow) {
         _log("✅ Alexa OAuth Flow Detected");
         _log("Redirect URI: $_redirectUri");
@@ -157,7 +160,7 @@ Map<String, String> _mergedQueryParamsFromUriBase() {
     try {
       // Step 1: Call the auth service to login
       _log("\n📍 STEP 1: Authenticating with backend...");
-      
+
       final authResult = await EnhancedAuthService.loginWithRoleValidation(
         email: email,
         password: password,
@@ -165,16 +168,18 @@ Map<String, String> _mergedQueryParamsFromUriBase() {
 
       if (authResult.isSuccess) {
         _log("✅ Login Successful");
-        
+
         // Login successful - get the JWT token
         final user = authResult.userSession!;
         final jwtToken = authResult.userSession?.token;
-        
-        _log("JWT Token: ${jwtToken?.substring(0, 20)}...${jwtToken?.substring(jwtToken.length - 20)}");
-        
+
+        _log(
+          "JWT Token: ${jwtToken?.substring(0, 20)}...${jwtToken?.substring(jwtToken.length - 20)}",
+        );
+
         if (mounted) {
           Provider.of<UserProvider>(context, listen: false).setUser(user);
-          
+
           // If this is an Alexa OAuth flow, proceed to get authorization code
           if (_isAlexaFlow && jwtToken != null) {
             _log("\n📍 STEP 2: Handling Alexa OAuth flow...");
@@ -209,7 +214,7 @@ Map<String, String> _mergedQueryParamsFromUriBase() {
 
       // Step 2: Request Alexa temporary code from backend
       _log("POST /v1/api/auth/sso/alexa/code");
-      
+
       final codeResult = await AuthService.getAlexaAuthorizationCode(
         token: jwtToken,
       );
@@ -222,7 +227,7 @@ Map<String, String> _mergedQueryParamsFromUriBase() {
 
         // Step 3: Build redirect URI with code and state
         _log("\n📍 STEP 3: Redirecting to Alexa...");
-        
+
         String redirectUrl = '$_redirectUri?code=${Uri.encodeComponent(code)}';
         if (_state != null && _state!.isNotEmpty) {
           redirectUrl += '&state=${Uri.encodeComponent(_state!)}';
@@ -238,7 +243,8 @@ Map<String, String> _mergedQueryParamsFromUriBase() {
       } else {
         _log("❌ Failed to generate code: ${codeResult['message']}");
         setState(() {
-          _error = codeResult['message'] ?? "Failed to generate authorization code.";
+          _error =
+              codeResult['message'] ?? "Failed to generate authorization code.";
         });
       }
     } catch (e) {
@@ -555,9 +561,7 @@ Map<String, String> _mergedQueryParamsFromUriBase() {
                           decoration: BoxDecoration(
                             color: const Color(0xffFEE2E2),
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: const Color(0xffFECACA),
-                            ),
+                            border: Border.all(color: const Color(0xffFECACA)),
                           ),
                           child: Text(
                             _error!,
@@ -578,8 +582,9 @@ Map<String, String> _mergedQueryParamsFromUriBase() {
                           onPressed: _busy ? null : _login,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xff1e3a8a),
-                            disabledBackgroundColor:
-                                const Color(0xff1e3a8a).withValues(alpha: 0.6),
+                            disabledBackgroundColor: const Color(
+                              0xff1e3a8a,
+                            ).withValues(alpha: 0.6),
                             elevation: 0,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),

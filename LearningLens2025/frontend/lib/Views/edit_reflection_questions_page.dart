@@ -8,11 +8,11 @@ class EditReflectionQuestionsPage extends StatefulWidget {
   final List<String> initialQuestions;
 
   const EditReflectionQuestionsPage({
-    Key? key,
+    super.key,
     required this.assignmentId,
     required this.courseId,
     required this.initialQuestions,
-  }) : super(key: key);
+  });
 
   @override
   State<EditReflectionQuestionsPage> createState() =>

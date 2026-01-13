@@ -1,15 +1,17 @@
 import 'dart:async';
 import 'dart:ffi';
 import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:new_simple_audio_trimmer/simple_audio_trimmer.dart';
 import 'package:path/path.dart' as Path;
 import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
 import 'package:sherpa_onnx/sherpa_onnx.dart' as sherpa_onnx;
-import 'package:new_simple_audio_trimmer/simple_audio_trimmer.dart';
+
 import '../../services/notetaker_config_service.dart';
 import '../notetaker/models/patient_note_model.dart';
 import './utils.dart';
@@ -118,7 +120,7 @@ class _StreamingAsrAndDiarizationScreenState
   sherpa_onnx.OnlineRecognizer? _recognizer;
   sherpa_onnx.OfflineRecognizer? _offlineRecognizer;
   sherpa_onnx.OnlineStream? _stream;
-  int _sampleRate = 16000;
+  final int _sampleRate = 16000;
 
   StreamSubscription<RecordState>? _recordSub;
   RecordState _recordState = RecordState.stop;
@@ -215,7 +217,9 @@ class _StreamingAsrAndDiarizationScreenState
               text: textToDisplay,
               selection: TextSelection.collapsed(offset: textToDisplay.length),
             );
-            _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+            _scrollController.jumpTo(
+              _scrollController.position.maxScrollExtent,
+            );
           },
           onDone: () {
             print('stream stopped.');
@@ -634,7 +638,12 @@ class _StreamingAsrAndDiarizationScreenState
             ? Column(
                 children: [CircularProgressIndicator(), Text("Processing")],
               )
-            : TextField(maxLines: 5, controller: _controller, readOnly: true, scrollController: _scrollController,),
+            : TextField(
+                maxLines: 5,
+                controller: _controller,
+                readOnly: true,
+                scrollController: _scrollController,
+              ),
         const SizedBox(height: 16),
         if (!_noteSaved) ...[
           Row(
@@ -660,7 +669,7 @@ class _StreamingAsrAndDiarizationScreenState
                               Padding(
                                 padding: EdgeInsets.all(10.0),
                                 child: DropdownButtonFormField<String>(
-                                  value: _selectedSpeaker,
+                                  initialValue: _selectedSpeaker,
                                   decoration: InputDecoration(
                                     labelText: 'Select A Speaker',
                                   ),

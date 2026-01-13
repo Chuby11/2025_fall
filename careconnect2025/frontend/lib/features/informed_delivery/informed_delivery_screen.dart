@@ -1,12 +1,13 @@
-import 'package:flutter/material.dart';
-import 'package:care_connect_app/widgets/app_bar_helper.dart';
-import 'package:care_connect_app/widgets/common_drawer.dart';
-import 'package:care_connect_app/services/informed_delivery_service.dart';
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
-import 'package:flutter_svg/flutter_svg.dart';
+
 import 'package:care_connect_app/assets/usps_digest_mock.dart';
-import 'dart:async';
+import 'package:care_connect_app/services/informed_delivery_service.dart';
+import 'package:care_connect_app/widgets/app_bar_helper.dart';
+import 'package:care_connect_app/widgets/common_drawer.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 /// ---- Domain models ----
 class EmailMessage {
@@ -343,12 +344,12 @@ class _InformedDeliveryScreenState extends State<InformedDeliveryScreen> {
       ),
     };
 
-    DateTime _parseDate(Object? v) {
+    DateTime parseDate(Object? v) {
       if (v is String) return DateTime.parse(v);
       throw FormatException('Invalid date value: $v');
     }
 
-    UspsActions _parseActions(Object? v) {
+    UspsActions parseActions(Object? v) {
       final m = (v is Map)
           ? v.map((k, v) => MapEntry(k.toString(), v))
           : <String, dynamic>{};
@@ -359,7 +360,7 @@ class _InformedDeliveryScreenState extends State<InformedDeliveryScreen> {
       );
     }
 
-    List<UspsMailpiece> _parseMailpieces(Object? v) {
+    List<UspsMailpiece> parseMailpieces(Object? v) {
       if (v is List) {
         return v.map((e) {
           final m = (e as Map).map((k, v) => MapEntry(k.toString(), v));
@@ -368,22 +369,22 @@ class _InformedDeliveryScreenState extends State<InformedDeliveryScreen> {
             sender: m['sender']?.toString() ?? '',
             summary: m['summary']?.toString() ?? '',
             imageDataUrl: m['imageDataUrl']?.toString() ?? '',
-            dateIso: _parseDate(m['dateIso']),
-            actions: _parseActions(m['actions']),
+            dateIso: parseDate(m['dateIso']),
+            actions: parseActions(m['actions']),
           );
         }).toList();
       }
       return const [];
     }
 
-    List<UspsPackage> _parsePackages(Object? v) {
+    List<UspsPackage> parsePackages(Object? v) {
       if (v is List) {
         return v.map((e) {
           final m = (e as Map).map((k, v) => MapEntry(k.toString(), v));
           return UspsPackage(
             trackingNumber: m['trackingNumber']?.toString() ?? '',
-            expectedDateIso: _parseDate(m['expectedDateIso']),
-            actions: _parseActions(m['actions']),
+            expectedDateIso: parseDate(m['expectedDateIso']),
+            actions: parseActions(m['actions']),
           );
         }).toList();
       }
@@ -391,9 +392,9 @@ class _InformedDeliveryScreenState extends State<InformedDeliveryScreen> {
     }
 
     return UspsDigest(
-      digestDate: _parseDate(map['digestDate']),
-      mailpieces: _parseMailpieces(map['mailpieces']),
-      packages: _parsePackages(map['packages']),
+      digestDate: parseDate(map['digestDate']),
+      mailpieces: parseMailpieces(map['mailpieces']),
+      packages: parsePackages(map['packages']),
     );
   }
 
@@ -403,7 +404,7 @@ class _InformedDeliveryScreenState extends State<InformedDeliveryScreen> {
       drawer: const CommonDrawer(currentRoute: '/informed-delivery'),
       appBar: AppBarHelper.createAppBar(
         context,
-        title: 'Informed Delivery (${_totalMailpieces})',
+        title: 'Informed Delivery ($_totalMailpieces)',
         centerTitle: true,
       ),
       body: _buildInformedDeliveryView(),

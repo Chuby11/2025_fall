@@ -1,13 +1,15 @@
 import 'dart:convert';
-import 'package:collection/collection.dart';
-import 'package:care_connect_app/services/api_service.dart';
+
 import 'package:care_connect_app/features/notetaker/models/patient_note_model.dart';
 import 'package:care_connect_app/providers/user_provider.dart';
+import 'package:care_connect_app/services/api_service.dart';
 import 'package:care_connect_app/services/notetaker_config_service.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+
 import '../../streaming_asr_with_diarization/streaming_asr_and_diarization.dart';
 import '../../tasks/models/task_model.dart';
 import '../../tasks/utils/task_utils.dart';
@@ -422,7 +424,7 @@ class _NotetakerSearchPageState extends State<NotetakerSearchPage> {
   Widget _buildPatientSection(ThemeData theme) {
     return _buildSection(theme, 'Select patient', Icons.person, [
       DropdownButtonFormField<String>(
-        value: _selectedPatientId,
+        initialValue: _selectedPatientId,
         decoration: InputDecoration(labelText: 'Select an option'),
         items: _patientList
             .map(

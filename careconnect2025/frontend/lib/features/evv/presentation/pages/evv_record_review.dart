@@ -83,7 +83,7 @@ class _EvvRecordReviewPageState extends State<EvvRecordReviewPage> {
   String _uniqueFileName(String base) {
     final ts = DateTime.now().toUtc().microsecondsSinceEpoch;
     final rand = math.Random().nextInt(0xFFFF).toRadixString(16).padLeft(4, '0');
-    return '${base}_${ts}_${rand}.edi';
+    return '${base}_${ts}_$rand.edi';
   }
 
   Future<void> _reviewRecord(EvvRecord record, bool approve, String? comment) async {
@@ -159,7 +159,7 @@ class _EvvRecordReviewPageState extends State<EvvRecordReviewPage> {
               SnackBar(content: Text('Saved to: $savePath')),
             );
           }
-        } catch (saveErr, st) {
+        } catch (saveErr) {
           // Fallback: write to temp and share
           final tempDir = await getTemporaryDirectory();
           final tempPath = '${tempDir.path}/$fileName';
@@ -177,7 +177,7 @@ class _EvvRecordReviewPageState extends State<EvvRecordReviewPage> {
           ),
         );
       }
-    } catch (e, st) {
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Export failed: $e'),
@@ -212,8 +212,8 @@ class _EvvRecordReviewPageState extends State<EvvRecordReviewPage> {
     final gender = (record.patient?.gender?.toUpperCase() == 'MALE' || record.patient?.gender?.toUpperCase() == 'M') ? 'M' : 'F';
     
     final claimId = '$patientId${record.dateOfService.millisecondsSinceEpoch.toString().substring(0, 10)}';
-    final evvId = 'EVV-${claimId}';
-    final lineEvvId = 'EVV-LINE-${claimId}';
+    final evvId = 'EVV-$claimId';
+    final lineEvvId = 'EVV-LINE-$claimId';
     
     final duration = record.timeOut.difference(record.timeIn).inMinutes;
     final units = ((duration / 15).ceil()).toString();
@@ -531,7 +531,7 @@ IEA*1*$controlNumber~
                 const SizedBox(width: 16),
                 Expanded(
                   child: DropdownButtonFormField<String>(
-                    value: _selectedStatusFilter,
+                    initialValue: _selectedStatusFilter,
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
                       contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),

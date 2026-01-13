@@ -409,8 +409,9 @@ class _TaskFormDialogState extends State<TaskFormDialog> {
                           context: context,
                           initialTime: selectedTime ?? TimeOfDay.now(),
                         );
-                        if (picked != null)
+                        if (picked != null) {
                           setState(() => selectedTime = picked);
+                        }
                       },
                       child: const Text("Pick Time"),
                     ),
@@ -465,8 +466,9 @@ class _TaskFormDialogState extends State<TaskFormDialog> {
                                   final name =
                                       "${p['patient']?['firstName'] ?? ''} ${p['patient']?['lastName'] ?? ''}"
                                           .trim();
-                                  if (pid == null)
+                                  if (pid == null) {
                                     return const SizedBox.shrink();
+                                  }
                                   return CheckboxListTile(
                                     title: Text(
                                       name.isEmpty ? "Unknown" : name,

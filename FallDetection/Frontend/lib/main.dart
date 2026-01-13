@@ -94,7 +94,7 @@ class HomeScreen extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => CameraImagesScreen(),
+                          builder: (context) => const CameraImagesScreen(),
                         ),
                       );
                     },
@@ -109,7 +109,7 @@ class HomeScreen extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => AlertsScreen(),
+                          builder: (context) => const AlertsScreen(),
                         ),
                       );
                     },

@@ -180,8 +180,9 @@ class _SchedulePageState extends State<SchedulePage> {
         '${baseUrl}scheduled-visits/caregiver/$caregiverId/range?startDate=$startStr&endDate=$endStr',
       );
       final response = await http.get(url, headers: headers);
-      if (response.statusCode != 200)
+      if (response.statusCode != 200) {
         throw Exception('summary range fetch failed');
+      }
       final List<dynamic> data = jsonDecode(response.body);
       _summaryPool = data.map((json) => ScheduledVisit.fromJson(json)).toList();
 
@@ -371,7 +372,7 @@ Widget _buildSummaryCard({
   final cappedScale = MediaQuery.of(context).textScaleFactor.clamp(1.0, 1.2);
 
   return MediaQuery(
-    data: MediaQuery.of(context).copyWith(textScaleFactor: cappedScale),
+    data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(cappedScale)),
     child: Container(
       // Allow it to grow if needed, but ensure a comfortable minimum
       constraints: const BoxConstraints(minHeight: 98),
@@ -777,7 +778,7 @@ Widget _buildSummaryCard({
               final formattedDate = DateFormat('EEEE, MMMM d').format(date);
 
               return _buildDateGroup(formattedDate, visits);
-            }).toList(),
+            }),
           ],
         ),
       ),
@@ -807,7 +808,7 @@ Widget _buildSummaryCard({
           final isLast = index == visits.length - 1;
 
           return _buildUpcomingVisitEntry(visit, isLast);
-        }).toList(),
+        }),
       ],
     );
   }
@@ -1242,7 +1243,7 @@ class _ScheduleVisitDialogState extends State<_ScheduleVisitDialog> {
                       _isLoading
                           ? const Center(child: CircularProgressIndicator())
                           : DropdownButtonFormField<Patient>(
-                              value: _selectedPatient,
+                              initialValue: _selectedPatient,
                               decoration: InputDecoration(
                                 hintText: 'Select a patient',
                                 border: OutlineInputBorder(
@@ -1273,7 +1274,7 @@ class _ScheduleVisitDialogState extends State<_ScheduleVisitDialog> {
                       _buildLabel('Service Type *'),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<String>(
-                        value: _selectedServiceType,
+                        initialValue: _selectedServiceType,
                         decoration: InputDecoration(
                           hintText: 'Select service type',
                           border: OutlineInputBorder(
@@ -1439,7 +1440,7 @@ class _ScheduleVisitDialogState extends State<_ScheduleVisitDialog> {
                                 _buildLabel('Priority'),
                                 const SizedBox(height: 8),
                                 DropdownButtonFormField<String>(
-                                  value: _priority,
+                                  initialValue: _priority,
                                   decoration: InputDecoration(
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(8),

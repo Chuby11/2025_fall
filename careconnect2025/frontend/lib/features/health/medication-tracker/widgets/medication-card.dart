@@ -10,11 +10,11 @@ class MedicationCard extends StatefulWidget {
   final VoidCallback? onMedicationRemoved;
 
   const MedicationCard({
-    Key? key,
+    super.key,
     required this.medication,
     required this.onStatusChanged,
     this.onMedicationRemoved,
-  }) : super(key: key);
+  });
 
   @override
   State<MedicationCard> createState() => _MedicationCardState();
@@ -173,7 +173,8 @@ class _MedicationCardState extends State<MedicationCard> {
               ),
               // Remove button - only show when medication is active and NOT a prescription
               if (widget.medication.isActive &&
-                  widget.medication.medicationType != MedicationType.PRESCRIPTION)
+                  widget.medication.medicationType !=
+                      MedicationType.PRESCRIPTION)
                 IconButton(
                   onPressed: _isRemoving ? null : _removeMedication,
                   icon: _isRemoving
@@ -217,9 +218,9 @@ class _MedicationCardState extends State<MedicationCard> {
                   Expanded(
                     child: Text(
                       'Medication is pending caregiver approval for removal. '
-                          'Please continue to take medication as proscribed. '
-                          'If medication is causing sever symptoms, please call '
-                          'your care giver immediately.',
+                      'Please continue to take medication as proscribed. '
+                      'If medication is causing sever symptoms, please call '
+                      'your care giver immediately.',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Colors.orange[700],
                         fontWeight: FontWeight.w500,

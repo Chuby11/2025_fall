@@ -2,11 +2,9 @@
 // Central catalog for search and navigation.
 // Supports both GoRouter routes and direct widget pushes.
 
-import 'package:flutter/material.dart';
-
 // Imports for widgetBuilder entries used below
-import 'package:care_connect_app/features/dashboard/caregiver-dashboard/pages/caregiver-dashboard.dart'; 
 import 'package:care_connect_app/widgets/hybrid_video_call_widget.dart'; // VideoCallTestPage 
+import 'package:flutter/material.dart';
 
 enum AppRole { PATIENT, CAREGIVER, FAMILY_LINK, ADMIN }
 enum NavKind { routePath, routeName, widgetBuilder }
